@@ -1,6 +1,11 @@
 from pico2d import *
 import game_framework
 import game_world
+from background import Background
+import stage1
+import camera
+
+background = None
 
 
 def handle_events():
@@ -12,7 +17,11 @@ def handle_events():
 
 
 def init():
-    pass
+    global background
+    background = Background(stage1.FOLDER)
+    game_world.add_object(background, 0)
+    camera.set_bounds(background.pixel_w, background.pixel_h)
+    camera.follow(*stage1.PLAYER_START)
 
 
 def finish():
