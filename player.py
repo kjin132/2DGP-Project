@@ -43,6 +43,7 @@ class Player:
             n = math.hypot(dx, dy)
             self.x += dx / n * PLAYER_SPEED * dt
             self.y += dy / n * PLAYER_SPEED * dt
+            self.clamp_to_map()
             if dx:
                 self.facing = 'right' if dx > 0 else 'left'
             else:
@@ -59,6 +60,10 @@ class Player:
         if self.facing == 'down':
             return 'front', False
         return 'side', self.facing == 'left'
+
+    def clamp_to_map(self):
+        self.x = min(max(self.x, 20), camera.map_w - 20)
+        self.y = min(max(self.y, 10), camera.map_h - 60)
 
     def draw(self):
         sx, sy = camera.to_screen(self.x, self.y)
