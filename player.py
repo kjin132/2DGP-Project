@@ -52,8 +52,18 @@ class Player:
             self.set_state('idle')
 
     # ---------- 그리기 ----------
+    def view(self):
+        """facing 에 맞는 시트 접미사와 좌우 반전 여부"""
+        if self.facing == 'up':
+            return 'back', False
+        if self.facing == 'down':
+            return 'front', False
+        return 'side', self.facing == 'left'
+
     def draw(self):
         sx, sy = camera.to_screen(self.x, self.y)
         scale = CHAR_SCALE * camera.Z
-        sheet = self.sprites['idle_front']
-        sheet.draw(sheet.frame_at(self.t), sx, sy, scale)
+        suffix, flip = self.view()
+        name = f'{self.state}_{suffix}' if self.state == 'walk' else 'idle_front'
+        sheet = self.sprites[name]
+        sheet.draw(sheet.frame_at(self.t), sx, sy, scale, flip)
