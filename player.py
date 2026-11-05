@@ -1,22 +1,59 @@
+import math
+from pico2d import *
 import game_framework
 import camera
 import sheriff_sprites
-from config import CHAR_SCALE
+from config import CHAR_SCALE, PLAYER_SPEED
 
+MOVE_KEYS = {SDLK_w: (0, 1), SDLK_s: (0, -1), SDLK_a: (-1, 0), SDLK_d: (1, 0)}
 
 class Player:
     def __init__(self, x, y):
         self.x, self.y = x, y
         self.sprites = sheriff_sprites.load()
+        self.held = set()             # 눌려 있는 이동 키
+        self.facing = 'down'          # down / up / left / right
+        self.state = 'idle'           # idle / walk
         self.t = 0.0                  # 현재 애니메이션 재생 시간
 
+    # ---------- 입력 ----------
     def handle_event(self, e):
-        pass
+        if e.type == SDL_KEYDOWN and e.key in MOVE_KEYS:
+            self.held.add(e.key)
+        elif e.type == SDL_KEYUP and e.key in MOVE_KEYS:
+            self.held.discard(e.key)
 
+
+    def move_dir(self):
+        dx = sum(MOVE_KEYS[k][0] for k in self.held)
+        dy = sum(MOVE_KEYS[k][1] for k in self.held)
+        return dx, dy
+
+    def set_state(self, s):
+        if s != self.state:
+            self.state = s
+            self.t = 0.0
+
+    # ---------- 갱신 ----------
     def update(self):
-        self.t += game_framework.frame_time
+        dt = game_framework.frame_time
+        self.t += dt
+        dx, dy = self.move_dir()
+        if dx or dy:
+            n = math.hypot(dx, dy)
+            self.x += dx / n * PLAYER_SPEED * dt
+            self.y += dy / n * PLAYER_SPEED * dt
+            if dx:
+                self.facing = 'right' if dx > 0 else 'left'
+            else:
+                self.facing = 'up' if dy > 0 else 'down'
+            self.set_state('walk')
+        else:
+            self.set_state('idle')
 
+    # ---------- 그리기 ----------
     def draw(self):
         sx, sy = camera.to_screen(self.x, self.y)
+        scale = CHAR_SCALE * camera.Z
         sheet = self.sprites['idle_front']
-        sheet.draw(sheet.frame_at(self.t), sx, sy, CHAR_SCALE * camera.Z)
+        sheet.draw(sheet.frame_at(self.t), sx, sy, scale)
