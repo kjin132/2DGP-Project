@@ -26,7 +26,6 @@ def init():
     game_world.add_object(background, 0)
     camera.set_bounds(background.pixel_w, background.pixel_h)
     player = Player(*stage1.PLAYER_START)
-    camera.follow(*stage1.PLAYER_START)
     game_world.add_object(player, 1)
 
 
@@ -36,6 +35,7 @@ def finish():
 
 def update():
     game_world.update()
+    camera.follow(player.x, player.y + 40)
 
 
 def draw():
