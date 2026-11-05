@@ -64,6 +64,5 @@ class Player:
         sx, sy = camera.to_screen(self.x, self.y)
         scale = CHAR_SCALE * camera.Z
         suffix, flip = self.view()
-        name = f'{self.state}_{suffix}' if self.state == 'walk' else 'idle_front'
-        sheet = self.sprites[name]
+        sheet = self.sprites[f'{self.state}_{suffix}']
         sheet.draw(sheet.frame_at(self.t), sx, sy, scale, flip)
