@@ -49,7 +49,7 @@ def run(start_mode):
         stack[-1].update()
         stack[-1].draw()
         now = time.time()
-        frame_time = now - current_time
+        frame_time = min(now - current_time, 0.05)   # 너무 긴 프레임은 잘라서 순간이동 방지
         current_time = now
 
     while len(stack) > 0:
