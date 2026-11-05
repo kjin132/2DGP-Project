@@ -1,0 +1,18 @@
+from sprite import SpriteSheet
+
+# (파일, 칸 크기, 열 수, 프레임 수, 발 위치, 반복)  — 캐릭터 키 약 256px, 24fps
+_SPECS = {
+    'idle_front': ('idle_front.png', 201, 269, 10, 50, (108, 268), True),
+}
+
+_cache = None
+
+
+def load():
+    global _cache
+    if _cache is None:
+        _cache = {}
+        for name, (f, w, h, cols, n, anchor, loop) in _SPECS.items():
+            _cache[name] = SpriteSheet('resources/sheriff/' + f, w, h, cols, n, anchor,
+                                       loop=loop, pingpong=(name == 'idle_front'))
+    return _cache
