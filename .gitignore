@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.idea/
+.vscode/
+ranking.json
+res_stage/
