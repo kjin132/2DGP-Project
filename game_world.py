@@ -1,5 +1,6 @@
 # 레이어: 0 바닥, 1 월드 오브젝트(y 정렬), 2 HUD
 world = [[], [], []]
+extra_sources = []      # 레이어 1 에 매 프레임 끼워 넣을 것 (화면에 보이는 맵 가림 조각)
 
 
 def add_object(o, depth=1):
@@ -28,7 +29,8 @@ def render():
     for depth, layer in enumerate(world):
         if depth == 1:
             # 위쪽(먼 곳)에 있는 것부터 그려서 앞에 있는 것이 뒤를 가리게
-            for o in sorted(layer, key=lambda o: -getattr(o, 'sort_y', o.y)):
+            objs = layer + [o for src in extra_sources for o in src()]
+            for o in sorted(objs, key=lambda o: -getattr(o, 'sort_y', o.y)):
                 o.draw()
         else:
             for o in layer:
@@ -38,3 +40,4 @@ def render():
 def clear():
     for layer in world:
         layer.clear()
+    extra_sources.clear()

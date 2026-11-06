@@ -4,6 +4,7 @@ import game_world
 from player import Player
 from background import Background
 from collision import CollisionMap
+from overlay import OverlaySet
 import stage1
 import camera
 
@@ -27,6 +28,8 @@ def init():
     game_world.add_object(background, 0)
     camera.set_bounds(background.pixel_w, background.pixel_h)
     collision = CollisionMap(stage1.FOLDER)
+    overlays = OverlaySet(stage1.FOLDER)
+    game_world.extra_sources.append(overlays.visible)    # 건물 윗부분이 캐릭터를 가리게
     Player.collision = collision
     player = Player(*stage1.PLAYER_START)
     game_world.add_object(player, 1)
