@@ -18,6 +18,7 @@ class Player:
         self.t = 0.0                  # 현재 애니메이션 재생 시간
         self.dash_dir = (1, 0)
         self.dash_cool = 0.0
+        self.invincible = False
 
     # ---------- 입력 ----------
     def handle_event(self, e):
@@ -33,13 +34,14 @@ class Player:
         if self.state == 'dash' or self.dash_cool > 0:
             return
         dx, dy = self.move_dir()
-        if not (dx or dy):
-            return
+        if not (dx or dy):                         # 서 있으면 바라보는 쪽으로
+            dx, dy = {'right': (1, 0), 'left': (-1, 0), 'up': (0, 1), 'down': (0, -1)}[self.facing]
         n = math.hypot(dx, dy)
         self.dash_dir = (dx / n, dy / n)
         if dx:
             self.facing = 'right' if dx > 0 else 'left'
         self.set_state('dash')
+        self.invincible = True
 
     def move_dir(self):
         dx = sum(MOVE_KEYS[k][0] for k in self.held)
@@ -61,6 +63,7 @@ class Player:
                           self.dash_dir[1] * PLAYER_SPEED * DASH_SPEED * dt)
             self.clamp_to_map()
             if self.t >= DASH_TIME:
+                self.invincible = False
                 self.dash_cool = DASH_COOLDOWN
                 self.set_state('idle')
             return
