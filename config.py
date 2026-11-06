@@ -7,3 +7,4 @@ CHAR_SCALE = 0.3           # 시트 원본 키 약 256px → 화면 약 77px
 PLAYER_SPEED = 220         # px/s
 DASH_TIME = 0.28           # 대시 지속 시간 (이 동안 무적)
 DASH_SPEED = 3.2           # 기본 속도의 배수
+DASH_COOLDOWN = 0.6

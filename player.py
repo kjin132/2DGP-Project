@@ -4,7 +4,7 @@ import game_framework
 import camera
 import sheriff_sprites
 import shadow
-from config import CHAR_SCALE, PLAYER_SPEED, DASH_TIME, DASH_SPEED
+from config import CHAR_SCALE, PLAYER_SPEED, DASH_TIME, DASH_SPEED, DASH_COOLDOWN
 
 MOVE_KEYS = {SDLK_w: (0, 1), SDLK_s: (0, -1), SDLK_a: (-1, 0), SDLK_d: (1, 0)}
 
@@ -17,6 +17,7 @@ class Player:
         self.state = 'idle'           # idle / walk / dash
         self.t = 0.0                  # 현재 애니메이션 재생 시간
         self.dash_dir = (1, 0)
+        self.dash_cool = 0.0
 
     # ---------- 입력 ----------
     def handle_event(self, e):
@@ -29,7 +30,7 @@ class Player:
 
 
     def start_dash(self):
-        if self.state == 'dash':
+        if self.state == 'dash' or self.dash_cool > 0:
             return
         dx, dy = self.move_dir()
         if not (dx or dy):
@@ -54,11 +55,13 @@ class Player:
     def update(self):
         dt = game_framework.frame_time
         self.t += dt
+        self.dash_cool = max(0.0, self.dash_cool - dt)
         if self.state == 'dash':
             self.try_move(self.dash_dir[0] * PLAYER_SPEED * DASH_SPEED * dt,
                           self.dash_dir[1] * PLAYER_SPEED * DASH_SPEED * dt)
             self.clamp_to_map()
             if self.t >= DASH_TIME:
+                self.dash_cool = DASH_COOLDOWN
                 self.set_state('idle')
             return
         dx, dy = self.move_dir()
