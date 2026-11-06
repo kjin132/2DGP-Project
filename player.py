@@ -3,6 +3,7 @@ from pico2d import *
 import game_framework
 import camera
 import sheriff_sprites
+import shadow
 from config import CHAR_SCALE, PLAYER_SPEED
 
 MOVE_KEYS = {SDLK_w: (0, 1), SDLK_s: (0, -1), SDLK_a: (-1, 0), SDLK_d: (1, 0)}
@@ -83,6 +84,7 @@ class Player:
 
     def draw(self):
         sx, sy = camera.to_screen(self.x, self.y)
+        shadow.draw(sx, sy + 2, 46 * camera.Z)
         scale = CHAR_SCALE * camera.Z
         suffix, flip = self.view()
         sheet = self.sprites[f'{self.state}_{suffix}']
