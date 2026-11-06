@@ -3,6 +3,7 @@ import game_framework
 import game_world
 from player import Player
 from background import Background
+from collision import CollisionMap
 import stage1
 import camera
 
@@ -25,6 +26,8 @@ def init():
     background = Background(stage1.FOLDER)
     game_world.add_object(background, 0)
     camera.set_bounds(background.pixel_w, background.pixel_h)
+    collision = CollisionMap(stage1.FOLDER)
+    Player.collision = collision
     player = Player(*stage1.PLAYER_START)
     game_world.add_object(player, 1)
 

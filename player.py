@@ -41,8 +41,7 @@ class Player:
         dx, dy = self.move_dir()
         if dx or dy:
             n = math.hypot(dx, dy)
-            self.x += dx / n * PLAYER_SPEED * dt
-            self.y += dy / n * PLAYER_SPEED * dt
+            self.try_move(dx / n * PLAYER_SPEED * dt, dy / n * PLAYER_SPEED * dt)
             self.clamp_to_map()
             if dx:
                 self.facing = 'right' if dx > 0 else 'left'
@@ -60,6 +59,22 @@ class Player:
         if self.facing == 'down':
             return 'front', False
         return 'side', self.facing == 'left'
+
+    collision = None    # 맵 충돌 격자, play_mode 가 채워 줌
+
+    def foot_bb(self, x=None, y=None):
+        x = self.x if x is None else x
+        y = self.y if y is None else y
+        return x - 12, y, x + 12, y + 10
+
+    def blocked(self, x, y):
+        return Player.collision is not None and Player.collision.blocks_walk(*self.foot_bb(x, y))
+
+    def try_move(self, dx, dy):
+        """막히지 않으면 이동"""
+        if not self.blocked(self.x + dx, self.y + dy):
+            self.x += dx
+            self.y += dy
 
     def clamp_to_map(self):
         self.x = min(max(self.x, 20), camera.map_w - 20)
