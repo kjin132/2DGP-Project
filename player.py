@@ -71,9 +71,10 @@ class Player:
         return Player.collision is not None and Player.collision.blocks_walk(*self.foot_bb(x, y))
 
     def try_move(self, dx, dy):
-        """막히지 않으면 이동"""
-        if not self.blocked(self.x + dx, self.y + dy):
+        """x, y 를 따로 움직여 보고 막히면 그 축만 취소 (벽을 따라 미끄러지듯)"""
+        if dx and not self.blocked(self.x + dx, self.y):
             self.x += dx
+        if dy and not self.blocked(self.x, self.y + dy):
             self.y += dy
 
     def clamp_to_map(self):
