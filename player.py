@@ -4,7 +4,7 @@ import game_framework
 import camera
 import sheriff_sprites
 import shadow
-from config import CHAR_SCALE, PLAYER_SPEED
+from config import CHAR_SCALE, PLAYER_SPEED, DASH_TIME, DASH_SPEED
 
 MOVE_KEYS = {SDLK_w: (0, 1), SDLK_s: (0, -1), SDLK_a: (-1, 0), SDLK_d: (1, 0)}
 
@@ -14,8 +14,9 @@ class Player:
         self.sprites = sheriff_sprites.load()
         self.held = set()             # 눌려 있는 이동 키
         self.facing = 'down'          # down / up / left / right
-        self.state = 'idle'           # idle / walk
+        self.state = 'idle'           # idle / walk / dash
         self.t = 0.0                  # 현재 애니메이션 재생 시간
+        self.dash_dir = (1, 0)
 
     # ---------- 입력 ----------
     def handle_event(self, e):
@@ -23,7 +24,21 @@ class Player:
             self.held.add(e.key)
         elif e.type == SDL_KEYUP and e.key in MOVE_KEYS:
             self.held.discard(e.key)
+        elif e.type == SDL_KEYDOWN and e.key == SDLK_SPACE:
+            self.start_dash()
 
+
+    def start_dash(self):
+        if self.state == 'dash':
+            return
+        dx, dy = self.move_dir()
+        if not (dx or dy):
+            return
+        n = math.hypot(dx, dy)
+        self.dash_dir = (dx / n, dy / n)
+        if dx:
+            self.facing = 'right' if dx > 0 else 'left'
+        self.set_state('dash')
 
     def move_dir(self):
         dx = sum(MOVE_KEYS[k][0] for k in self.held)
@@ -39,6 +54,13 @@ class Player:
     def update(self):
         dt = game_framework.frame_time
         self.t += dt
+        if self.state == 'dash':
+            self.try_move(self.dash_dir[0] * PLAYER_SPEED * DASH_SPEED * dt,
+                          self.dash_dir[1] * PLAYER_SPEED * DASH_SPEED * dt)
+            self.clamp_to_map()
+            if self.t >= DASH_TIME:
+                self.set_state('idle')
+            return
         dx, dy = self.move_dir()
         if dx or dy:
             n = math.hypot(dx, dy)
@@ -87,5 +109,9 @@ class Player:
         shadow.draw(sx, sy + 2, 46 * camera.Z)
         scale = CHAR_SCALE * camera.Z
         suffix, flip = self.view()
+        if self.state == 'dash':                     # 대시는 일단 걷기 그림으로
+            sheet = self.sprites[f'walk_{suffix}']
+            sheet.draw(sheet.frame_at(self.t * 2), sx, sy, scale, flip)
+            return
         sheet = self.sprites[f'{self.state}_{suffix}']
         sheet.draw(sheet.frame_at(self.t), sx, sy, scale, flip)
