@@ -18,8 +18,9 @@ def set_bounds(w, h):
 def follow(tx, ty):
     """목표(플레이어)를 화면 가운데에 두되, 맵 밖은 보이지 않게 고정"""
     global x, y
-    x = min(max(tx - VIEW_W / 2, 0), max(0, map_w - VIEW_W))
-    y = min(max(ty - VIEW_H / 2, 0), max(0, map_h - VIEW_H))
+    # 정수로 맞춰야 맵 조각과 가림 조각이 1px 도 어긋나지 않음
+    x = int(min(max(tx - VIEW_W / 2, 0), max(0, map_w - VIEW_W)))
+    y = int(min(max(ty - VIEW_H / 2, 0), max(0, map_h - VIEW_H)))
 
 
 def to_screen(wx, wy):
