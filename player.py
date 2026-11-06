@@ -109,8 +109,8 @@ class Player:
         shadow.draw(sx, sy + 2, 46 * camera.Z)
         scale = CHAR_SCALE * camera.Z
         suffix, flip = self.view()
-        if self.state == 'dash':                     # 대시는 일단 걷기 그림으로
-            sheet = self.sprites[f'walk_{suffix}']
+        if self.state == 'dash':                     # 대시는 옆모습 한 종류
+            sheet, flip = self.sprites['dash'], self.facing == 'left'
             sheet.draw(sheet.frame_at(self.t * 2), sx, sy, scale, flip)
             return
         sheet = self.sprites[f'{self.state}_{suffix}']

@@ -8,6 +8,7 @@ _SPECS = {
     'walk_side':  ('walk_side.png', 195, 283, 24, 24, (111, 282), True),
     'walk_front': ('walk_front.png', 162, 265, 14, 28, (58, 262), True),
     'walk_back':  ('walk_back.png', 175, 271, 16, 32, (84, 264), True),
+    'dash':       ('dash.png', 325, 273, 10, 20, (121, 270), True),
 }
 
 _cache = None
