@@ -7,6 +7,7 @@ from collision import CollisionMap
 from overlay import OverlaySet
 from bullet import Bullet
 from ui_item import ITEM_CLASSES
+from pedestal import UIPedestal
 import stage1
 import camera
 from config import SCREEN_H
@@ -14,6 +15,7 @@ from config import SCREEN_H
 player = None
 background = None
 items = []
+pedestals = []
 mouse_screen = (0, 0)     # 마우스 화면 좌표 (pico2d 기준, 아래가 0)
 
 
@@ -34,7 +36,7 @@ def handle_events():
 
 
 def init():
-    global player, background, items
+    global player, background, items, pedestals
     background = Background(stage1.FOLDER)
     game_world.add_object(background, 0)
     camera.set_bounds(background.pixel_w, background.pixel_h)
@@ -44,6 +46,9 @@ def init():
     Player.collision = Bullet.collision = collision
     items = [ITEM_CLASSES[k](x, y) for k, x, y in stage1.build_items()]
     game_world.add_objects(items, 1)
+    pedestals = [UIPedestal(x, y) for x, y in stage1.build_pedestals()]
+    game_world.add_objects(pedestals, 1)
+    Player.pedestals = pedestals
     player = Player(*stage1.PLAYER_START)
     game_world.add_object(player, 1)
 

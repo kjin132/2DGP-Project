@@ -41,6 +41,7 @@ class Player:
         elif e.type == SDL_KEYDOWN and e.key == SDLK_r:
             self.start_reload()
 
+    pedestals = []      # 거치대 목록, play_mode 가 채워 줌
 
     def set_aim(self, wx, wy):
         self.aim_x, self.aim_y = wx, wy
@@ -144,7 +145,11 @@ class Player:
         return x - 12, y, x + 12, y + 10
 
     def blocked(self, x, y):
-        return Player.collision is not None and Player.collision.blocks_walk(*self.foot_bb(x, y))
+        from collision import overlaps
+        bb = self.foot_bb(x, y)
+        if Player.collision and Player.collision.blocks_walk(*bb):
+            return True
+        return any(overlaps(bb, p.get_bb()) for p in Player.pedestals)
 
     def try_move(self, dx, dy):
         """x, y 를 따로 움직여 보고 막히면 그 축만 취소 (벽을 따라 미끄러지듯)"""

@@ -30,3 +30,10 @@ class CollisionMap:
 
     def blocks_bullet(self, x, y):
         return self.at(x, y) == SOLID
+
+
+def overlaps(a, b):
+    """두 사각형 (left, bottom, right, top) 이 겹치는지"""
+    al, ab, ar, at = a
+    bl, bb, br, bt = b
+    return al < br and bl < ar and ab < bt and bb < at
