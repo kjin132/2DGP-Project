@@ -6,7 +6,8 @@ import camera
 import sheriff_sprites
 import shadow
 from bullet import Bullet
-from config import CHAR_SCALE, PLAYER_SPEED, DASH_TIME, DASH_SPEED, DASH_COOLDOWN
+from config import (CHAR_SCALE, PLAYER_SPEED, DASH_TIME, DASH_SPEED, DASH_COOLDOWN,
+                    FIRE_INTERVAL)
 
 GUN_HEIGHT = 56        # 발에서 총구까지 높이 (화면 px)
 GUN_REACH = 38         # 몸 중심에서 총구까지 가로 거리
@@ -25,6 +26,7 @@ class Player:
         self.dash_cool = 0.0
         self.invincible = False
         self.aim_x, self.aim_y = x + 100, y       # 마우스가 가리키는 월드 좌표
+        self.fire_cool = 0.0
 
     # ---------- 입력 ----------
     def handle_event(self, e):
@@ -40,13 +42,14 @@ class Player:
         self.aim_x, self.aim_y = wx, wy
 
     def fire(self):
-        if self.state == 'dash':
+        if self.state == 'dash' or self.fire_cool > 0:
             return
         right = self.aim_x >= self.x
         gx = self.x + (GUN_REACH if right else -GUN_REACH)
         gy = self.y + GUN_HEIGHT
         angle = math.atan2(self.aim_y - gy, self.aim_x - gx)
         game_world.add_object(Bullet(gx, gy, angle), 1)
+        self.fire_cool = FIRE_INTERVAL
 
     def start_dash(self):
         if self.state == 'dash' or self.dash_cool > 0:
@@ -76,6 +79,7 @@ class Player:
         dt = game_framework.frame_time
         self.t += dt
         self.dash_cool = max(0.0, self.dash_cool - dt)
+        self.fire_cool = max(0.0, self.fire_cool - dt)
         if self.state == 'dash':
             self.try_move(self.dash_dir[0] * PLAYER_SPEED * DASH_SPEED * dt,
                           self.dash_dir[1] * PLAYER_SPEED * DASH_SPEED * dt)
