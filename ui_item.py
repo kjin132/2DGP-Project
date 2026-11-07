@@ -1,4 +1,6 @@
+import math
 from pico2d import load_image
+import game_framework
 import camera
 from config import ITEM_WORLD_SIZE
 
@@ -17,14 +19,16 @@ class UIItem:
     손에 들거나 거치대에 있을 때만 켜진 것(active)으로 보고, HUD 가 그 정보만 그린다."""
     kind = 'base'
     name = 'UI'
-    icon = None            # resources/ui 의 그림 이름
+    icon = None            # resources/ui 의 그림 이름 (빛 있는 버전은 _glow)
 
     def __init__(self, x, y):
         self.x, self.y = x, y
         self.owner = 'floor'
         self.is_fake = False
         self.durability = 100
+        self.t = 0.0
         self.image = _image(self.icon)
+        self.glow = _image(self.icon + '_glow')
         k = ITEM_WORLD_SIZE / max(self.image.w, self.image.h)
         self.w, self.h = self.image.w * k, self.image.h * k
 
@@ -33,13 +37,17 @@ class UIItem:
         return self.owner in ('player', 'pedestal')
 
     def update(self):
-        pass
+        self.t += game_framework.frame_time
 
-    def draw_at(self, sx, sy):
-        """화면 좌표 (sx, sy) 를 바닥점으로 해서 그림"""
+    def draw_at(self, sx, sy, glow=True):
+        """화면 좌표 (sx, sy) 를 바닥점으로 해서 그림. 빛은 은은하게 깜빡임"""
         Z = camera.Z
         w, h = self.w * Z, self.h * Z
         cy = sy + h / 2
+        if glow:
+            self.glow.opacify(0.55 + 0.45 * math.sin(self.t * 4))
+            self.glow.draw(sx, cy, w, h)
+            self.glow.opacify(1.0)
         self.image.draw(sx, cy, w, h)
 
     def draw(self):
