@@ -12,14 +12,18 @@ from config import SCREEN_H
 
 player = None
 background = None
+mouse_screen = (0, 0)     # 마우스 화면 좌표 (pico2d 기준, 아래가 0)
 
 
 def handle_events():
+    global mouse_screen
     for event in get_events():
         if event.type == SDL_QUIT:
             game_framework.quit()
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.quit()
+        elif event.type == SDL_MOUSEMOTION:
+            mouse_screen = (event.x, SCREEN_H - 1 - event.y)
         elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
             player.set_aim(*camera.to_world(event.x, SCREEN_H - 1 - event.y))
             player.fire()
@@ -47,6 +51,7 @@ def finish():
 def update():
     game_world.update()
     camera.follow(player.x, player.y + 40)
+    player.set_aim(*camera.to_world(*mouse_screen))
 
 
 def draw():
