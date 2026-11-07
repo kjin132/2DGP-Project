@@ -63,6 +63,8 @@ class Player:
         self.ammo -= 1
         self.fire_cool = FIRE_INTERVAL
         self.facing = 'right' if right else 'left'
+        if self.state == 'idle' or self.state == 'shoot':   # 서서 쏘면 사격 동작, 걸으면서 쏘면 걷기 유지
+            self.state, self.t = 'shoot', 0.0
         if self.ammo == 0:
             self.start_reload()
 
@@ -109,6 +111,10 @@ class Player:
                 self.set_state('idle')
             return
         dx, dy = self.move_dir()
+        if self.state == 'shoot' and not (dx or dy):
+            if self.sprites['shoot'].finished(self.t * 2):
+                self.set_state('idle')
+            return
         if dx or dy:
             n = math.hypot(dx, dy)
             self.try_move(dx / n * PLAYER_SPEED * dt, dy / n * PLAYER_SPEED * dt)
@@ -159,6 +165,10 @@ class Player:
         if self.state == 'dash':                     # 대시는 옆모습 한 종류
             sheet, flip = self.sprites['dash'], self.facing == 'left'
             sheet.draw(sheet.frame_at(self.t * 2), sx, sy, scale, flip)
+            return
+        if self.state == 'shoot':                    # 사격은 옆모습, 2배속
+            sheet = self.sprites['shoot']
+            sheet.draw(sheet.frame_at(self.t * 2), sx, sy, scale, self.facing == 'left')
             return
         sheet = self.sprites[f'{self.state}_{suffix}']
         sheet.draw(sheet.frame_at(self.t), sx, sy, scale, flip)
