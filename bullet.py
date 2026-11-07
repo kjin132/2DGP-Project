@@ -27,5 +27,7 @@ class Bullet:
             game_world.remove_object(self)
 
     def draw(self):
+        # 그림이 위(+90도)를 보고 있으므로 90도 빼서 날아가는 방향을 보게 함
         sx, sy = camera.to_screen(self.x, self.y)
-        Bullet.image.draw(sx, sy, BULLET_SIZE[0] * camera.Z, BULLET_SIZE[1] * camera.Z)
+        Bullet.image.composite_draw(self.angle - math.pi / 2, '', sx, sy,
+                                    BULLET_SIZE[0] * camera.Z, BULLET_SIZE[1] * camera.Z)
