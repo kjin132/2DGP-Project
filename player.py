@@ -7,7 +7,7 @@ import sheriff_sprites
 import shadow
 from bullet import Bullet
 from config import (CHAR_SCALE, PLAYER_SPEED, DASH_TIME, DASH_SPEED, DASH_COOLDOWN,
-                    FIRE_INTERVAL)
+                    MAX_AMMO, RELOAD_TIME, FIRE_INTERVAL)
 
 GUN_HEIGHT = 56        # 발에서 총구까지 높이 (화면 px)
 GUN_REACH = 38         # 몸 중심에서 총구까지 가로 거리
@@ -26,6 +26,8 @@ class Player:
         self.dash_cool = 0.0
         self.invincible = False
         self.aim_x, self.aim_y = x + 100, y       # 마우스가 가리키는 월드 좌표
+        self.ammo = MAX_AMMO
+        self.reload_t = 0.0                       # 0 보다 크면 재장전 중
         self.fire_cool = 0.0
 
     # ---------- 입력 ----------
@@ -41,15 +43,25 @@ class Player:
     def set_aim(self, wx, wy):
         self.aim_x, self.aim_y = wx, wy
 
+    def start_reload(self):
+        if self.reload_t <= 0 and self.ammo < MAX_AMMO:
+            self.reload_t = RELOAD_TIME
+
     def fire(self):
-        if self.state == 'dash' or self.fire_cool > 0:
+        if self.state == 'dash' or self.reload_t > 0 or self.fire_cool > 0:
+            return
+        if self.ammo <= 0:
+            self.start_reload()
             return
         right = self.aim_x >= self.x
         gx = self.x + (GUN_REACH if right else -GUN_REACH)
         gy = self.y + GUN_HEIGHT
         angle = math.atan2(self.aim_y - gy, self.aim_x - gx)
         game_world.add_object(Bullet(gx, gy, angle), 1)
+        self.ammo -= 1
         self.fire_cool = FIRE_INTERVAL
+        if self.ammo == 0:
+            self.start_reload()
 
     def start_dash(self):
         if self.state == 'dash' or self.dash_cool > 0:
@@ -80,6 +92,10 @@ class Player:
         self.t += dt
         self.dash_cool = max(0.0, self.dash_cool - dt)
         self.fire_cool = max(0.0, self.fire_cool - dt)
+        if self.reload_t > 0:
+            self.reload_t -= dt
+            if self.reload_t <= 0:
+                self.ammo = MAX_AMMO
         if self.state == 'dash':
             self.try_move(self.dash_dir[0] * PLAYER_SPEED * DASH_SPEED * dt,
                           self.dash_dir[1] * PLAYER_SPEED * DASH_SPEED * dt)
