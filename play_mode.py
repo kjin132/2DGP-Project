@@ -5,6 +5,7 @@ from player import Player
 from background import Background
 from collision import CollisionMap
 from overlay import OverlaySet
+from bullet import Bullet
 import stage1
 import camera
 from config import SCREEN_H
@@ -34,7 +35,7 @@ def init():
     collision = CollisionMap(stage1.FOLDER)
     overlays = OverlaySet(stage1.FOLDER)
     game_world.extra_sources.append(overlays.visible)    # 건물 윗부분이 캐릭터를 가리게
-    Player.collision = collision
+    Player.collision = Bullet.collision = collision
     player = Player(*stage1.PLAYER_START)
     game_world.add_object(player, 1)
 

@@ -27,3 +27,6 @@ class CollisionMap:
                 if self.at(cx * c + 1, cy * c + 1) != WALK:
                     return True
         return False
+
+    def blocks_bullet(self, x, y):
+        return self.at(x, y) == SOLID
