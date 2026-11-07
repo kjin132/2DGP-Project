@@ -8,3 +8,8 @@ PLAYER_SPEED = 220         # px/s
 DASH_TIME = 0.28           # 대시 지속 시간 (이 동안 무적)
 DASH_SPEED = 3.2           # 기본 속도의 배수
 DASH_COOLDOWN = 0.6
+
+# 사격
+BULLET_SPEED = 900
+BULLET_LIFE = 1.2
+BULLET_SIZE = (8, 16)      # 화면에 그릴 총알 크기
