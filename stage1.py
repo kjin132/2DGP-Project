@@ -6,3 +6,8 @@
 FOLDER = 'resources/map/stage1'
 PLAYER_START = (2560, 1470)
 
+
+def build_items():
+    """스테이지 1 에 떨어진 UI: HP 바(시작 지점 근처), 미니맵(서쪽 다리 건너), 점수판(남동쪽 길) (PRD 2.6)"""
+    return [('hp', 2700, 1490), ('minimap', 1640, 1480), ('score', 4140, 700)]
+

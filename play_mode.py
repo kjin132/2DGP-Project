@@ -6,12 +6,14 @@ from background import Background
 from collision import CollisionMap
 from overlay import OverlaySet
 from bullet import Bullet
+from ui_item import ITEM_CLASSES
 import stage1
 import camera
 from config import SCREEN_H
 
 player = None
 background = None
+items = []
 mouse_screen = (0, 0)     # 마우스 화면 좌표 (pico2d 기준, 아래가 0)
 
 
@@ -32,7 +34,7 @@ def handle_events():
 
 
 def init():
-    global player, background
+    global player, background, items
     background = Background(stage1.FOLDER)
     game_world.add_object(background, 0)
     camera.set_bounds(background.pixel_w, background.pixel_h)
@@ -40,6 +42,8 @@ def init():
     overlays = OverlaySet(stage1.FOLDER)
     game_world.extra_sources.append(overlays.visible)    # 건물 윗부분이 캐릭터를 가리게
     Player.collision = Bullet.collision = collision
+    items = [ITEM_CLASSES[k](x, y) for k, x, y in stage1.build_items()]
+    game_world.add_objects(items, 1)
     player = Player(*stage1.PLAYER_START)
     game_world.add_object(player, 1)
 
