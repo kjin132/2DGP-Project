@@ -62,6 +62,7 @@ class Player:
         game_world.add_object(Bullet(gx, gy, angle), 1)
         self.ammo -= 1
         self.fire_cool = FIRE_INTERVAL
+        self.facing = 'right' if right else 'left'
         if self.ammo == 0:
             self.start_reload()
 
