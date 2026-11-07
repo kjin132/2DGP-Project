@@ -13,10 +13,15 @@ class Bullet:
         if Bullet.image is None:
             Bullet.image = load_image('resources/effect/bullet.png')   # 탄두가 위를 보는 그림
         self.x, self.y = x, y          # y 는 그림 위치(총구 높이)
+        self.height = 56               # 바닥에서 총구까지 높이, 그리는 순서 정렬용
         self.angle = angle
         self.vx = math.cos(angle) * BULLET_SPEED
         self.vy = math.sin(angle) * BULLET_SPEED
         self.life = BULLET_LIFE
+
+    @property
+    def sort_y(self):
+        return self.y - self.height
 
     def update(self):
         dt = game_framework.frame_time
