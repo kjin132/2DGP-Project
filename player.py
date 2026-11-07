@@ -38,6 +38,8 @@ class Player:
             self.held.discard(e.key)
         elif e.type == SDL_KEYDOWN and e.key == SDLK_SPACE:
             self.start_dash()
+        elif e.type == SDL_KEYDOWN and e.key == SDLK_r:
+            self.start_reload()
 
 
     def set_aim(self, wx, wy):
