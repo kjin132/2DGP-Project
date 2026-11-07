@@ -8,7 +8,8 @@ from config import BULLET_SPEED, BULLET_LIFE, BULLET_SIZE
 
 class Bullet:
     image = None
-    collision = None    # 맵 충돌 격자, play_mode 가 채워 줌
+    collision = None    # 맵 충돌 격자
+    obstacles = []      # 거치대처럼 따로 놓인 물체, play_mode 가 채워 줌
 
     def __init__(self, x, y, angle):
         if Bullet.image is None:
@@ -31,7 +32,7 @@ class Bullet:
         self.life -= dt
         # 맵은 총알의 바닥 위치(그림 위치에서 총구 높이만큼 아래)로 판정
         hit_map = Bullet.collision and Bullet.collision.blocks_bullet(self.x, self.y - self.height)
-        if self.life <= 0 or hit_map:
+        if self.life <= 0 or hit_map or any(o.blocks_point(self.x, self.y) for o in Bullet.obstacles):
             game_world.remove_object(self)
 
     def draw(self):

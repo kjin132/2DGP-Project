@@ -49,6 +49,7 @@ def init():
     pedestals = [UIPedestal(x, y) for x, y in stage1.build_pedestals()]
     game_world.add_objects(pedestals, 1)
     Player.pedestals = pedestals
+    Bullet.obstacles = pedestals
     player = Player(*stage1.PLAYER_START)
     game_world.add_object(player, 1)
 
