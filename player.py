@@ -8,6 +8,9 @@ import shadow
 from bullet import Bullet
 from config import CHAR_SCALE, PLAYER_SPEED, DASH_TIME, DASH_SPEED, DASH_COOLDOWN
 
+GUN_HEIGHT = 56        # 발에서 총구까지 높이 (화면 px)
+GUN_REACH = 38         # 몸 중심에서 총구까지 가로 거리
+
 MOVE_KEYS = {SDLK_w: (0, 1), SDLK_s: (0, -1), SDLK_a: (-1, 0), SDLK_d: (1, 0)}
 
 class Player:
@@ -39,7 +42,9 @@ class Player:
     def fire(self):
         if self.state == 'dash':
             return
-        gx, gy = self.x, self.y + 40
+        right = self.aim_x >= self.x
+        gx = self.x + (GUN_REACH if right else -GUN_REACH)
+        gy = self.y + GUN_HEIGHT
         angle = math.atan2(self.aim_y - gy, self.aim_x - gx)
         game_world.add_object(Bullet(gx, gy, angle), 1)
 

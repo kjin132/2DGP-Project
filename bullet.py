@@ -12,7 +12,7 @@ class Bullet:
     def __init__(self, x, y, angle):
         if Bullet.image is None:
             Bullet.image = load_image('resources/effect/bullet.png')   # 탄두가 위를 보는 그림
-        self.x, self.y = x, y
+        self.x, self.y = x, y          # y 는 그림 위치(총구 높이)
         self.angle = angle
         self.vx = math.cos(angle) * BULLET_SPEED
         self.vy = math.sin(angle) * BULLET_SPEED
