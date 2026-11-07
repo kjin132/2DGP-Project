@@ -1,9 +1,11 @@
 import math
 from pico2d import *
 import game_framework
+import game_world
 import camera
 import sheriff_sprites
 import shadow
+from bullet import Bullet
 from config import CHAR_SCALE, PLAYER_SPEED, DASH_TIME, DASH_SPEED, DASH_COOLDOWN
 
 MOVE_KEYS = {SDLK_w: (0, 1), SDLK_s: (0, -1), SDLK_a: (-1, 0), SDLK_d: (1, 0)}
@@ -19,6 +21,7 @@ class Player:
         self.dash_dir = (1, 0)
         self.dash_cool = 0.0
         self.invincible = False
+        self.aim_x, self.aim_y = x + 100, y       # 마우스가 가리키는 월드 좌표
 
     # ---------- 입력 ----------
     def handle_event(self, e):
@@ -29,6 +32,16 @@ class Player:
         elif e.type == SDL_KEYDOWN and e.key == SDLK_SPACE:
             self.start_dash()
 
+
+    def set_aim(self, wx, wy):
+        self.aim_x, self.aim_y = wx, wy
+
+    def fire(self):
+        if self.state == 'dash':
+            return
+        gx, gy = self.x, self.y + 40
+        angle = math.atan2(self.aim_y - gy, self.aim_x - gx)
+        game_world.add_object(Bullet(gx, gy, angle), 1)
 
     def start_dash(self):
         if self.state == 'dash' or self.dash_cool > 0:

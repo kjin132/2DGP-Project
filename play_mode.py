@@ -7,6 +7,7 @@ from collision import CollisionMap
 from overlay import OverlaySet
 import stage1
 import camera
+from config import SCREEN_H
 
 player = None
 background = None
@@ -18,6 +19,9 @@ def handle_events():
             game_framework.quit()
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.quit()
+        elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
+            player.set_aim(*camera.to_world(event.x, SCREEN_H - 1 - event.y))
+            player.fire()
         else:
             player.handle_event(event)
 
