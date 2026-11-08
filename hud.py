@@ -13,10 +13,12 @@ class HUD:
         self.player, self.items, self.pedestals = player, items, pedestals
         self.map_image = load_image(map_image)       # 맵 그림을 줄인 것
         self.map_w, self.map_h = map_w, map_h
+        self.mouse = (0, 0)
         self.font = load_font('resources/font/Galmuri11.ttf', 22)
         self.big_font = load_font('resources/font/Galmuri11.ttf', 33)
         self.hp_frame, self.hp_fill = _img('item_hp_frame'), _img('item_hp_fill')
         self.minimap = _img('item_minimap')
+        self.crosshair = _img('item_crosshair')
         self.ammo_frame = _img('item_ammo_frame')
         self.bullet = load_image('resources/effect/bullet.png')
         self.score_frame = _img('item_score_frame')
@@ -96,6 +98,9 @@ class HUD:
         # 숫자는 SCORE 글자 아래 (그림 위쪽 기준 y 약 640)
         self.big_font.draw(cx - len(text) * 9.3, cy + h / 2 - 640 * s, text, (60, 30, 20))
 
+    def draw_crosshair(self):
+        self.crosshair.draw(*self.mouse, 48, 48)
+
     def draw_slots(self):
         """손 슬롯 2칸, 선택한 칸 강조 (PRD 2.1)"""
         size, gap = 64, 10
@@ -138,3 +143,5 @@ class HUD:
             self.draw_ammo()
         if 'score' in kinds:
             self.draw_score()
+        if 'crosshair' in kinds:
+            self.draw_crosshair()

@@ -57,6 +57,7 @@ def init():
     game_world.add_object(player, 1)
     hud = HUD(player, items, pedestals, f'{stage1.FOLDER}/minimap.png', background.pixel_w, background.pixel_h)
     game_world.add_object(hud, 2)
+    hide_cursor()      # 마우스 커서 대신 조준선 UI 가 있어야 조준점이 보임
 
 
 def finish():
@@ -67,6 +68,7 @@ def update():
     game_world.update()
     camera.follow(player.x, player.y + 40)
     player.set_aim(*camera.to_world(*mouse_screen))
+    hud.mouse = mouse_screen   # 카메라가 움직여도 조준점이 마우스를 따라가게
 
 
 def draw():
