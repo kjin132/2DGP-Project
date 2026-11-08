@@ -8,6 +8,7 @@ from overlay import OverlaySet
 from bullet import Bullet
 from ui_item import ITEM_CLASSES
 from pedestal import UIPedestal
+from hud import HUD
 import stage1
 import camera
 from config import SCREEN_H
@@ -16,6 +17,7 @@ player = None
 background = None
 items = []
 pedestals = []
+hud = None
 mouse_screen = (0, 0)     # 마우스 화면 좌표 (pico2d 기준, 아래가 0)
 
 
@@ -36,7 +38,7 @@ def handle_events():
 
 
 def init():
-    global player, background, items, pedestals
+    global player, background, items, pedestals, hud
     background = Background(stage1.FOLDER)
     game_world.add_object(background, 0)
     camera.set_bounds(background.pixel_w, background.pixel_h)
@@ -53,6 +55,8 @@ def init():
     Bullet.obstacles = pedestals
     player = Player(*stage1.PLAYER_START)
     game_world.add_object(player, 1)
+    hud = HUD(player, items)
+    game_world.add_object(hud, 2)
 
 
 def finish():
