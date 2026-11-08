@@ -9,10 +9,13 @@ def _img(name):
 
 
 class HUD:
-    def __init__(self, player, items):
-        self.player, self.items = player, items
+    def __init__(self, player, items, pedestals, map_image, map_w, map_h):
+        self.player, self.items, self.pedestals = player, items, pedestals
+        self.map_image = load_image(map_image)       # 맵 그림을 줄인 것
+        self.map_w, self.map_h = map_w, map_h
         self.font = load_font('resources/font/Galmuri11.ttf', 22)
         self.hp_frame, self.hp_fill = _img('item_hp_frame'), _img('item_hp_fill')
+        self.minimap = _img('item_minimap')
         self.slot = _img('slot')
 
     def active_kinds(self):
@@ -38,6 +41,22 @@ class HUD:
             src_w = int(269 * ratio)
             self.hp_fill.clip_draw_to_origin(19, self.hp_fill.h - 70, src_w, 48,
                                              left, bottom, slot_w * ratio, slot_h)
+
+    def draw_minimap(self):
+        S = 220
+        cx, cy = SCREEN_W - 16 - S / 2, SCREEN_H - 16 - S / 2
+        k = S / self.minimap.w
+        self.minimap.draw(cx, cy, S, self.minimap.h * k)
+        # 양피지 안쪽: 왼쪽 위 기준 x 160~815, y 159~818
+        left = cx - S / 2 + 160 * k
+        top = cy + self.minimap.h * k / 2 - 159 * k
+        iw, ih = (815 - 160) * k, (818 - 159) * k
+        # 맵이 가로로 길어서 양피지 안에 비율을 지켜 넣고 위아래는 가운데 정렬
+        mw = iw
+        mh = iw * self.map_h / self.map_w
+        top -= (ih - mh) / 2
+        iw, ih = mw, mh
+        self.map_image.draw(left + iw / 2, top - ih / 2, iw, ih)
 
     def draw_slots(self):
         """손 슬롯 2칸, 선택한 칸 강조 (PRD 2.1)"""
@@ -75,3 +94,5 @@ class HUD:
         kinds = self.active_kinds()
         if 'hp' in kinds:
             self.draw_hp()
+        if 'minimap' in kinds:
+            self.draw_minimap()

@@ -55,7 +55,7 @@ def init():
     Bullet.obstacles = pedestals
     player = Player(*stage1.PLAYER_START)
     game_world.add_object(player, 1)
-    hud = HUD(player, items)
+    hud = HUD(player, items, pedestals, f'{stage1.FOLDER}/minimap.png', background.pixel_w, background.pixel_h)
     game_world.add_object(hud, 2)
 
 
