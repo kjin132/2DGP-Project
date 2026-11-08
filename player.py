@@ -71,7 +71,7 @@ class Player:
         return None, None
 
     def interact(self):
-        if self.state == 'dash':
+        if self.state in ('dash', 'pickup'):
             return
         action, target = self.interaction_target()
         if action == 'pickup':
@@ -79,6 +79,8 @@ class Player:
         elif action == 'drop':
             self.put_down(self.hands[self.selected], self.x, self.y)
             self.hands[self.selected] = None
+        if action:
+            self.set_state('pickup')
 
     def pick_up(self, item):
         """빈 슬롯에 넣음. 손이 꽉 차 있으면 선택한 슬롯의 UI 와 바꾸고, 들고 있던 것은 그 자리에 떨어뜨림"""
@@ -165,6 +167,10 @@ class Player:
                 self.set_state('idle')
             return
         dx, dy = self.move_dir()
+        if self.state == 'pickup':                   # 줍는 동안은 멈춤
+            if self.sprites['pickup'].finished(self.t * 1.6):
+                self.set_state('idle')
+            return
         if self.state == 'shoot' and not (dx or dy):
             if self.sprites['shoot'].finished(self.t * 2):
                 self.set_state('idle')
@@ -223,6 +229,10 @@ class Player:
         if self.state == 'dash':                     # 대시는 옆모습 한 종류
             sheet, flip = self.sprites['dash'], self.facing == 'left'
             sheet.draw(sheet.frame_at(self.t * 2), sx, sy, scale, flip)
+            return
+        if self.state == 'pickup':                   # 줍기는 옆모습, 1.6배속
+            sheet = self.sprites['pickup']
+            sheet.draw(sheet.frame_at(self.t * 1.6), sx, sy, scale, self.facing == 'left')
             return
         if self.state == 'shoot':                    # 사격은 옆모습, 2배속
             sheet = self.sprites['shoot']

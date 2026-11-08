@@ -10,6 +10,7 @@ _SPECS = {
     'walk_back':  ('walk_back.png', 175, 271, 16, 32, (84, 264), True),
     'dash':       ('dash.png', 325, 273, 10, 20, (121, 270), True),
     'shoot':      ('shoot.png', 466, 261, 7, 27, (124, 260), False),
+    'pickup':     ('pickup.png', 207, 259, 10, 20, (72, 257), False),
 }
 
 _cache = None
