@@ -14,6 +14,10 @@ GUN_REACH = 38         # 몸 중심에서 총구까지 가로 거리
 
 MOVE_KEYS = {SDLK_w: (0, 1), SDLK_s: (0, -1), SDLK_a: (-1, 0), SDLK_d: (1, 0)}
 
+BODY_HALF_W = 17       # 몸통 너비의 절반 (월드 px)
+BODY_BOX_H = 22        # 충돌 상자 높이 (발끝 ~ 무릎)
+
+
 class Player:
     def __init__(self, x, y):
         self.x, self.y = x, y
@@ -223,14 +227,17 @@ class Player:
 
     collision = None    # 맵 충돌 격자, play_mode 가 채워 줌
 
-    def foot_bb(self, x=None, y=None):
+    def body_bb(self, x=None, y=None):
+        """충돌 상자: 좌우는 몸통 양끝, 아래는 발끝, 위는 무릎 높이.
+        오른쪽으로 가다 부딪히면 몸 오른쪽 끝, 왼쪽은 왼쪽 끝, 아래는 발끝이 닿는 순간 멈춘다.
+        위쪽을 머리까지 잡으면 건물 사이 길(약 72px)을 키(약 77px)가 못 지나가서 무릎 높이까지만."""
         x = self.x if x is None else x
         y = self.y if y is None else y
-        return x - 12, y, x + 12, y + 10
+        return x - BODY_HALF_W, y, x + BODY_HALF_W, y + BODY_BOX_H
 
     def blocked(self, x, y):
         from collision import overlaps
-        bb = self.foot_bb(x, y)
+        bb = self.body_bb(x, y)
         if Player.collision and Player.collision.blocks_walk(*bb):
             return True
         return any(overlaps(bb, p.get_bb()) for p in Player.pedestals)
