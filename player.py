@@ -62,10 +62,12 @@ class Player:
 
     def interaction_target(self):
         """E 키를 누르면 할 일과 대상 (PRD 2.1 판정 순서)
-        1 바닥 UI 줍기"""
+        1 바닥 UI 줍기 → 2 내려놓기"""
         item = self.nearest(Player.items, lambda o: o.owner == 'floor')
         if item:
             return 'pickup', item
+        if self.hands[self.selected]:
+            return 'drop', None
         return None, None
 
     def interact(self):
@@ -74,6 +76,9 @@ class Player:
         action, target = self.interaction_target()
         if action == 'pickup':
             self.pick_up(target)
+        elif action == 'drop':
+            self.put_down(self.hands[self.selected], self.x, self.y)
+            self.hands[self.selected] = None
 
     def pick_up(self, item):
         """빈 슬롯에 넣음 (선택한 슬롯 우선)"""
@@ -85,6 +90,10 @@ class Player:
             return
         item.owner = 'player'
         self.hands[slot] = item
+
+    def put_down(self, item, x, y):
+        item.owner = 'floor'
+        item.x, item.y = x, y
 
     def set_aim(self, wx, wy):
         self.aim_x, self.aim_y = wx, wy
