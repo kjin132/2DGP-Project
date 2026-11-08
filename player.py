@@ -62,10 +62,13 @@ class Player:
 
     def interaction_target(self):
         """E 키를 누르면 할 일과 대상 (PRD 2.1 판정 순서)
-        1 바닥 UI 줍기 → 2 빈 거치대에 설치 → 3 내려놓기"""
+        1 바닥 UI 줍기 → 2 거치대의 UI 줍기 → 3 빈 거치대에 설치 → 4 내려놓기"""
         item = self.nearest(Player.items, lambda o: o.owner == 'floor')
         if item:
             return 'pickup', item
+        ped = self.nearest(Player.pedestals, lambda p: p.item is not None)
+        if ped:
+            return 'take', ped
         ped = self.nearest(Player.pedestals, lambda p: p.item is None)
         if ped and self.hands[self.selected]:
             return 'install', ped
@@ -79,6 +82,8 @@ class Player:
         action, target = self.interaction_target()
         if action == 'pickup':
             self.pick_up(target)
+        elif action == 'take':
+            self.take_from(target)
         elif action == 'install':
             target.place(self.hands[self.selected])
             self.hands[self.selected] = None
@@ -97,6 +102,19 @@ class Player:
         else:
             slot = self.selected
             self.put_down(self.hands[slot], item.x, item.y)
+        item.owner = 'player'
+        self.hands[slot] = item
+
+    def take_from(self, ped):
+        """거치대의 UI 를 손으로. 손이 꽉 차면 선택한 슬롯의 UI 를 대신 거치대에 올림"""
+        item = ped.take()
+        if self.hands[self.selected] is None:
+            slot = self.selected
+        elif None in self.hands:
+            slot = self.hands.index(None)
+        else:
+            slot = self.selected
+            ped.place(self.hands[slot])
         item.owner = 'player'
         self.hands[slot] = item
 
