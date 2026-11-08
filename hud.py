@@ -16,6 +16,8 @@ class HUD:
         self.font = load_font('resources/font/Galmuri11.ttf', 22)
         self.hp_frame, self.hp_fill = _img('item_hp_frame'), _img('item_hp_fill')
         self.minimap = _img('item_minimap')
+        self.ammo_frame = _img('item_ammo_frame')
+        self.bullet = load_image('resources/effect/bullet.png')
         self.dots = {k: _img('mm_' + k) for k in ('player', 'item', 'pedestal')}
         self.slot = _img('slot')
 
@@ -67,6 +69,18 @@ class HUD:
                 self.dots['item'].draw(mx(i.x), my(i.y), 8, 8)
         self.dots['player'].draw(mx(self.player.x), my(self.player.y), 10, 10)
 
+    def draw_ammo(self):
+        W = 280
+        s = W / self.ammo_frame.w
+        h = self.ammo_frame.h * s
+        cx, cy = 16 + W / 2, 16 + h / 2
+        self.ammo_frame.draw(cx, cy, W, h)
+        # 탄 칸 9개: 왼쪽 위 기준 x 88 + 72*i (너비 64), y 100~211
+        for i in range(self.player.ammo):
+            x = cx - W / 2 + (88 + 72 * i + 32) * s
+            y = cy + h / 2 - 155.5 * s
+            self.bullet.draw(x, y, 64 * s * 0.75, 111 * s * 0.9)
+
     def draw_slots(self):
         """손 슬롯 2칸, 선택한 칸 강조 (PRD 2.1)"""
         size, gap = 64, 10
@@ -105,3 +119,5 @@ class HUD:
             self.draw_hp()
         if 'minimap' in kinds:
             self.draw_minimap()
+        if 'ammo' in kinds:
+            self.draw_ammo()
