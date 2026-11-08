@@ -7,7 +7,7 @@ import sheriff_sprites
 import shadow
 from bullet import Bullet
 from config import (CHAR_SCALE, PLAYER_SPEED, DASH_TIME, DASH_SPEED, DASH_COOLDOWN,
-                    MAX_AMMO, RELOAD_TIME, FIRE_INTERVAL, PICK_RANGE)
+                    MAX_AMMO, RELOAD_TIME, FIRE_INTERVAL, PICK_RANGE, MAX_HP)
 
 GUN_HEIGHT = 56        # 발에서 총구까지 높이 (화면 px)
 GUN_REACH = 38         # 몸 중심에서 총구까지 가로 거리
@@ -29,6 +29,7 @@ class Player:
         self.ammo = MAX_AMMO
         self.reload_t = 0.0                       # 0 보다 크면 재장전 중
         self.fire_cool = 0.0
+        self.hp = MAX_HP
         self.hands = [None, None]                 # 손 슬롯 2칸
         self.selected = 0                         # 1/2 키로 고른 슬롯
 

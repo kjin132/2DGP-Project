@@ -20,3 +20,6 @@ FIRE_INTERVAL = 0.25
 # UI 오브젝트
 ITEM_WORLD_SIZE = 64       # 바닥에 놓인 UI 의 긴 변 길이 (px)
 PICK_RANGE = 70            # E 키가 닿는 거리
+
+# 플레이어 체력
+MAX_HP = 100
