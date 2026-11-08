@@ -81,13 +81,14 @@ class Player:
             self.hands[self.selected] = None
 
     def pick_up(self, item):
-        """빈 슬롯에 넣음 (선택한 슬롯 우선)"""
+        """빈 슬롯에 넣음. 손이 꽉 차 있으면 선택한 슬롯의 UI 와 바꾸고, 들고 있던 것은 그 자리에 떨어뜨림"""
         if self.hands[self.selected] is None:
             slot = self.selected
         elif None in self.hands:
             slot = self.hands.index(None)
         else:
-            return
+            slot = self.selected
+            self.put_down(self.hands[slot], item.x, item.y)
         item.owner = 'player'
         self.hands[slot] = item
 
