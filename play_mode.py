@@ -46,6 +46,7 @@ def init():
     Player.collision = Bullet.collision = collision
     items = [ITEM_CLASSES[k](x, y) for k, x, y in stage1.build_items()]
     game_world.add_objects(items, 1)
+    Player.items = items
     pedestals = [UIPedestal(x, y) for x, y in stage1.build_pedestals()]
     game_world.add_objects(pedestals, 1)
     Player.pedestals = pedestals

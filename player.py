@@ -7,7 +7,7 @@ import sheriff_sprites
 import shadow
 from bullet import Bullet
 from config import (CHAR_SCALE, PLAYER_SPEED, DASH_TIME, DASH_SPEED, DASH_COOLDOWN,
-                    MAX_AMMO, RELOAD_TIME, FIRE_INTERVAL)
+                    MAX_AMMO, RELOAD_TIME, FIRE_INTERVAL, PICK_RANGE)
 
 GUN_HEIGHT = 56        # 발에서 총구까지 높이 (화면 px)
 GUN_REACH = 38         # 몸 중심에서 총구까지 가로 거리
@@ -44,8 +44,47 @@ class Player:
             self.start_reload()
         elif e.type == SDL_KEYDOWN and e.key in (SDLK_1, SDLK_2):
             self.selected = 0 if e.key == SDLK_1 else 1
+        elif e.type == SDL_KEYDOWN and e.key == SDLK_e:
+            self.interact()
 
-    pedestals = []      # 거치대 목록, play_mode 가 채워 줌
+    # ---------- UI 줍기 / 내려놓기 ----------
+    items = []          # 맵의 UI 목록, play_mode 가 채워 줌
+    pedestals = []      # 거치대 목록
+
+    def nearest(self, objs, cond):
+        best, bd = None, PICK_RANGE
+        for o in objs:
+            if cond(o):
+                d = math.hypot(o.x - self.x, o.y - self.y)
+                if d < bd:
+                    best, bd = o, d
+        return best
+
+    def interaction_target(self):
+        """E 키를 누르면 할 일과 대상 (PRD 2.1 판정 순서)
+        1 바닥 UI 줍기"""
+        item = self.nearest(Player.items, lambda o: o.owner == 'floor')
+        if item:
+            return 'pickup', item
+        return None, None
+
+    def interact(self):
+        if self.state == 'dash':
+            return
+        action, target = self.interaction_target()
+        if action == 'pickup':
+            self.pick_up(target)
+
+    def pick_up(self, item):
+        """빈 슬롯에 넣음 (선택한 슬롯 우선)"""
+        if self.hands[self.selected] is None:
+            slot = self.selected
+        elif None in self.hands:
+            slot = self.hands.index(None)
+        else:
+            return
+        item.owner = 'player'
+        self.hands[slot] = item
 
     def set_aim(self, wx, wy):
         self.aim_x, self.aim_y = wx, wy
