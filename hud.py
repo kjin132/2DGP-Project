@@ -1,5 +1,6 @@
 """켜져 있는(손에 들었거나 거치대에 올린) UI 만 화면에 그리는 HUD"""
 from pico2d import load_image, load_font
+import camera
 from config import SCREEN_W
 
 
@@ -36,6 +37,20 @@ class HUD:
             self.font.draw(cx - size / 2 + 4, y + size / 2 - 10, str(i + 1), (255, 235, 180) if sel else (170, 160, 140))
         self.slot.opacify(1.0)
 
+    def draw_prompt(self):
+        """E 키 안내: 가까운 대상 위에 "E: 줍기" 같은 문구"""
+        action, target = self.player.interaction_target()
+        if not action:
+            return
+        label = {'pickup': '줍기', 'take': '줍기', 'install': '설치', 'drop': '내려놓기'}[action]
+        tx, ty = (target.x, target.y) if target is not None else (self.player.x, self.player.y)
+        sx, sy = camera.to_screen(tx, ty)
+        text = f'E: {label}'
+        if action == 'pickup':
+            text += f' ({target.name})'
+        self.font.draw(sx - len(text) * 6, sy + 110 * camera.Z, text, (255, 240, 200))
+
     def draw(self):
         self.draw_slots()
+        self.draw_prompt()
 
