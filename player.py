@@ -29,6 +29,8 @@ class Player:
         self.ammo = MAX_AMMO
         self.reload_t = 0.0                       # 0 보다 크면 재장전 중
         self.fire_cool = 0.0
+        self.hands = [None, None]                 # 손 슬롯 2칸
+        self.selected = 0                         # 1/2 키로 고른 슬롯
 
     # ---------- 입력 ----------
     def handle_event(self, e):
@@ -40,6 +42,8 @@ class Player:
             self.start_dash()
         elif e.type == SDL_KEYDOWN and e.key == SDLK_r:
             self.start_reload()
+        elif e.type == SDL_KEYDOWN and e.key in (SDLK_1, SDLK_2):
+            self.selected = 0 if e.key == SDLK_1 else 1
 
     pedestals = []      # 거치대 목록, play_mode 가 채워 줌
 
