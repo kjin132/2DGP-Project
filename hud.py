@@ -19,6 +19,8 @@ class HUD:
         self.hp_frame, self.hp_fill = _img('item_hp_frame'), _img('item_hp_fill')
         self.minimap = _img('item_minimap')
         self.crosshair = _img('item_crosshair')
+        self.aim_dot = _img('aim_dot')
+        self.aim_dot.opacify(0.7)
         self.ammo_frame = _img('item_ammo_frame')
         self.bullet = load_image('resources/effect/bullet.png')
         self.score_frame = _img('item_score_frame')
@@ -101,6 +103,10 @@ class HUD:
     def draw_crosshair(self):
         self.crosshair.draw(*self.mouse, 48, 48)
 
+    def draw_aim_dot(self):
+        """조준선 UI 가 없을 때는 마우스 위치에 작은 점만 (방향만 알 수 있게)"""
+        self.aim_dot.draw(*self.mouse, 10, 10)
+
     def draw_slots(self):
         """손 슬롯 2칸, 선택한 칸 강조 (PRD 2.1)"""
         size, gap = 64, 10
@@ -145,3 +151,5 @@ class HUD:
             self.draw_score()
         if 'crosshair' in kinds:
             self.draw_crosshair()
+        else:
+            self.draw_aim_dot()
