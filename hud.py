@@ -14,11 +14,14 @@ class HUD:
         self.map_image = load_image(map_image)       # 맵 그림을 줄인 것
         self.map_w, self.map_h = map_w, map_h
         self.font = load_font('resources/font/Galmuri11.ttf', 22)
+        self.big_font = load_font('resources/font/Galmuri11.ttf', 33)
         self.hp_frame, self.hp_fill = _img('item_hp_frame'), _img('item_hp_fill')
         self.minimap = _img('item_minimap')
         self.ammo_frame = _img('item_ammo_frame')
         self.bullet = load_image('resources/effect/bullet.png')
+        self.score_frame = _img('item_score_frame')
         self.dots = {k: _img('mm_' + k) for k in ('player', 'item', 'pedestal')}
+        self.score = 0
         self.slot = _img('slot')
 
     def active_kinds(self):
@@ -83,6 +86,16 @@ class HUD:
         if self.player.reload_t > 0:
             self.font.draw(cx - W / 2, cy + h / 2 + 14, '재장전...', (255, 230, 170))
 
+    def draw_score(self):
+        W = 150
+        s = W / self.score_frame.w
+        h = self.score_frame.h * s
+        cx, cy = SCREEN_W / 2, SCREEN_H - 12 - h / 2
+        self.score_frame.draw(cx, cy, W, h)
+        text = f'{self.score:,}'
+        # 숫자는 SCORE 글자 아래 (그림 위쪽 기준 y 약 640)
+        self.big_font.draw(cx - len(text) * 9.3, cy + h / 2 - 640 * s, text, (60, 30, 20))
+
     def draw_slots(self):
         """손 슬롯 2칸, 선택한 칸 강조 (PRD 2.1)"""
         size, gap = 64, 10
@@ -123,3 +136,5 @@ class HUD:
             self.draw_minimap()
         if 'ammo' in kinds:
             self.draw_ammo()
+        if 'score' in kinds:
+            self.draw_score()
