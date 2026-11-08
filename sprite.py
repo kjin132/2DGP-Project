@@ -5,7 +5,7 @@ class SpriteSheet:
     """가로 cols 칸짜리 스프라이트 시트 한 장 = 애니메이션 하나.
     anchor 는 칸 왼쪽 위 기준 발 위치(x, y). 그릴 때는 발 위치를 월드 좌표에 맞춘다."""
 
-    def __init__(self, path, w, h, cols, frames, anchor, fps=24, loop=True, pingpong=False):
+    def __init__(self, path, w, h, cols, frames, anchor, fps=24, loop=True, pingpong=False, size=1.0):
         self.image = load_image(path)
         self.w, self.h = w, h
         self.cols = cols
@@ -14,6 +14,7 @@ class SpriteSheet:
         self.fps = fps
         self.loop = loop
         self.pingpong = pingpong
+        self.size = size        # 시트마다 그림 속 캐릭터 키가 달라서 맞추는 배율
 
     @property
     def duration(self):
@@ -33,6 +34,7 @@ class SpriteSheet:
 
     def draw(self, i, x, y, scale=1.0, flip=False):
         """i 번째 프레임을 발 위치 (x, y) 에 그림. pico2d 는 아래쪽이 y=0."""
+        scale *= self.size
         col, row = i % self.cols, i // self.cols
         left = col * self.w
         bottom = self.image.h - (row + 1) * self.h

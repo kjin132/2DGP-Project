@@ -13,6 +13,9 @@ _SPECS = {
     'pickup':     ('pickup.png', 207, 259, 10, 20, (72, 257), False),
 }
 
+# 옆모습 대기 시트는 그림 속 키가 걷기 시트보다 작게(255px vs 262px) 그려져 있어서 키워서 맞춤
+_SIZE = {'idle_side': 262 / 255}
+
 _cache = None
 
 
@@ -22,5 +25,6 @@ def load():
         _cache = {}
         for name, (f, w, h, cols, n, anchor, loop) in _SPECS.items():
             _cache[name] = SpriteSheet('resources/sheriff/' + f, w, h, cols, n, anchor,
-                                       loop=loop, pingpong=(name == 'idle_front'))
+                                       loop=loop, pingpong=(name == 'idle_front'),
+                                       size=_SIZE.get(name, 1.0))
     return _cache
