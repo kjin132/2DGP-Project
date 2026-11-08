@@ -16,6 +16,7 @@ class HUD:
         self.font = load_font('resources/font/Galmuri11.ttf', 22)
         self.hp_frame, self.hp_fill = _img('item_hp_frame'), _img('item_hp_fill')
         self.minimap = _img('item_minimap')
+        self.dots = {k: _img('mm_' + k) for k in ('player', 'item', 'pedestal')}
         self.slot = _img('slot')
 
     def active_kinds(self):
@@ -57,6 +58,14 @@ class HUD:
         top -= (ih - mh) / 2
         iw, ih = mw, mh
         self.map_image.draw(left + iw / 2, top - ih / 2, iw, ih)
+        mx = lambda x: left + x / self.map_w * iw
+        my = lambda y: top - ih + y / self.map_h * ih
+        for p in self.pedestals:
+            self.dots['pedestal'].draw(mx(p.x), my(p.y), 8, 8)
+        for i in self.items:
+            if i.owner == 'floor':
+                self.dots['item'].draw(mx(i.x), my(i.y), 8, 8)
+        self.dots['player'].draw(mx(self.player.x), my(self.player.y), 10, 10)
 
     def draw_slots(self):
         """손 슬롯 2칸, 선택한 칸 강조 (PRD 2.1)"""
