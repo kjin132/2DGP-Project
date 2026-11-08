@@ -80,6 +80,8 @@ class HUD:
             x = cx - W / 2 + (88 + 72 * i + 32) * s
             y = cy + h / 2 - 155.5 * s
             self.bullet.draw(x, y, 64 * s * 0.75, 111 * s * 0.9)
+        if self.player.reload_t > 0:
+            self.font.draw(cx - W / 2, cy + h / 2 + 14, '재장전...', (255, 230, 170))
 
     def draw_slots(self):
         """손 슬롯 2칸, 선택한 칸 강조 (PRD 2.1)"""
