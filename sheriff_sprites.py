@@ -13,7 +13,9 @@ _SPECS = {
     'pickup':     ('pickup.png', 215, 262, 10, 20, (73, 259), False),
 }
 
-# 옆모습 발 위치 x 는 머리와 발 가운데가 같은 자리에 오도록 잡음 (서 있다 걸을 때 몸이 옆으로 튀지 않게)
+# 옆모습: 대기 그림은 걷기보다 자세가 낮게(모자 챙 높이 221 vs 228) 그려져 있어서 3% 키워서 맞춤.
+# 발 위치 x 는 머리와 발 가운데가 같은 자리에 오도록 잡음 (서 있다 걸을 때 몸이 옆으로 튀지 않게)
+_SIZE = {'idle_side': 1.03}
 
 _cache = None
 
@@ -24,5 +26,6 @@ def load():
         _cache = {}
         for name, (f, w, h, cols, n, anchor, loop) in _SPECS.items():
             _cache[name] = SpriteSheet('resources/sheriff/' + f, w, h, cols, n, anchor,
-                                       loop=loop, pingpong=(name == 'idle_front'))
+                                       loop=loop, pingpong=(name == 'idle_front'),
+                                       size=_SIZE.get(name, 1.0))
     return _cache
