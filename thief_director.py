@@ -23,6 +23,9 @@ class ThiefDirector:
     def spawn(self):
         p = self.player
         far = [s for s in self.spawns if math.hypot(s[0] - p.x, s[1] - p.y) >= THIEF_SPAWN_MIN_DIST]
+        gate = Thief.exit_gate
+        if gate is not None:          # 출구 바로 옆에서 나오면 훔치고 곧장 빠져나가 버리므로 뺌
+            far = [s for s in far if math.hypot(s[0] - gate.x, s[1] - gate.y) >= 900] or far
         x, y = random.choice(far or self.spawns)
         self.thief = Thief(x, y)
         game_world.add_object(self.thief, 1)
