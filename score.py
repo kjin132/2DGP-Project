@@ -1,6 +1,8 @@
 """점수 (PRD 2.9): 점수판 UI 가 켜져 있을 때만 쌓이고,
 최종 점수 = 기본 점수 × 콤보 배율 × 블라인드 배율. 도둑을 놓친 감점은 점수판이 없어도 깎임."""
 import game_framework
+import game_world
+from effects import FloatText
 
 COMBO_WINDOW = 3.0          # 이 시간 안에 다음 적을 쓰러뜨리면 콤보가 이어짐
 COMBO_STEPS = ((10, 2.5), (6, 2.0), (3, 1.5), (1, 1.0))
@@ -35,6 +37,9 @@ class Score:
         return BLIND_MULT[self.blind_count()]
 
     # ---------- 점수 ----------
+    def popup(self, x, y, text, color=(255, 230, 120)):
+        game_world.add_object(FloatText(x, y, text, color), 1)
+
     def add(self, base):
         """배율을 곱해 더함. 점수판이 꺼져 있으면 0. 실제로 더한 점수를 돌려줌"""
         if not self.board_active():
@@ -43,12 +48,15 @@ class Score:
         self.value += gained
         return gained
 
-    def kill(self, base, window=COMBO_WINDOW):
-        """적 처치: 콤보를 잇고 점수를 더함"""
+    def kill(self, base, x, y, window=COMBO_WINDOW):
+        """적 처치: 콤보를 잇고 점수를 더함. 얻은 점수를 그 자리에 띄움"""
         self.combo = self.combo + 1 if self.combo_t > 0 else 1
         self.max_combo = max(self.max_combo, self.combo)
         self.combo_t = window
-        return self.add(base)
+        gained = self.add(base)
+        if gained:
+            self.popup(x, y, f'+{gained}')
+        return gained
 
     def penalty(self, amount):
         """점수판과 관계없이 깎임"""

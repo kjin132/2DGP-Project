@@ -4,6 +4,7 @@ import random
 import game_framework
 import game_world
 import camera
+from pico2d import load_font
 from config import ITEM_WORLD_SIZE
 
 
@@ -51,3 +52,29 @@ class Shards:
             cx, cy = camera.to_screen(self.x + p['x'], self.y + p['y'] + p['z'])
             self.image.clip_draw(sx, sy, pw, ph, cx, cy, pw * self.k * Z, ph * self.k * Z)
         self.image.opacify(1.0)
+
+
+class FloatText:
+    """얻은 점수 같은 글자가 위로 떠오르다 사라짐 (월드 위치)"""
+    LIFE = 1.0
+    font = None
+
+    def __init__(self, x, y, text, color=(255, 230, 120)):
+        if FloatText.font is None:
+            FloatText.font = load_font('resources/font/Galmuri11.ttf', 22)
+        self.x, self.y = x, y
+        self.text, self.color = text, color
+        self.t = 0.0
+
+    @property
+    def sort_y(self):
+        return -1e9          # 언제나 맨 앞에
+
+    def update(self):
+        self.t += game_framework.frame_time
+        if self.t >= self.LIFE:
+            game_world.remove_object(self)
+
+    def draw(self):
+        sx, sy = camera.to_screen(self.x, self.y + 90 + 30 * self.t)
+        FloatText.font.draw(sx - len(self.text) * 6, sy, self.text, self.color)

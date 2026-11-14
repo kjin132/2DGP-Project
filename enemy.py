@@ -124,7 +124,7 @@ class Enemy(Body):
     def die(self):
         self.drop_carried()
         if Enemy.score is not None:
-            Enemy.score.kill(self.points)
+            Enemy.score.kill(self.points, self.x, self.y)
         self.hp = 0
         self.set_state('dead')
         self.moving = False
