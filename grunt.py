@@ -94,6 +94,14 @@ class Grunt(Enemy):
             self.attack_cool = GRUNT_ATTACK_COOL
             self.set_state('chase')
 
+    def take_hit(self, damage):
+        """맞으면 등 뒤에서 쏴도 알아차리고 쫓아옴"""
+        super().take_hit(damage)
+        if self.alive and self.state in ('wander', 'search') and self.target:
+            self.last_seen = (self.target.x, self.target.y)
+            self.face_toward(self.target.x - self.x, self.target.y - self.y)
+            self.set_state('chase')
+
     @property
     def winding_up(self):
         """칼을 들어 올리는 중 (적 경보등 UI 가 알려 주는 순간)"""
