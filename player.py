@@ -155,6 +155,8 @@ class Player(Body):
             self.state, self.t = 'shoot', 0.0
 
     def put_down(self, item, x, y):
+        if self.blocked(x, y):            # 벽·건물 안이면 발밑에 놓음
+            x, y = self.x, self.y
         item.owner = 'floor'
         item.x, item.y = x, y
 
