@@ -11,6 +11,7 @@ from ui_item import ITEM_CLASSES
 from pedestal import UIPedestal
 from hud import HUD
 from grunt import Grunt
+from enemy import Enemy
 import pathfind
 import stage1
 import camera
@@ -62,6 +63,7 @@ def init():
     game_world.add_objects(enemies, 1)
     player = Player(*stage1.PLAYER_START)
     game_world.add_object(player, 1)
+    Enemy.target = player
     hud = HUD(player, items, pedestals, f'{stage1.FOLDER}/minimap.png', background.pixel_w, background.pixel_h)
     game_world.add_object(hud, 2)
     hide_cursor()      # 마우스 커서 대신 조준선 UI 가 있어야 조준점이 보임
