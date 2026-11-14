@@ -1,6 +1,5 @@
 """갱단원 (Grunt): 플레이어에게 다가와 칼로 근접 공격 (PRD 2.5)"""
 import random
-import game_framework
 from body import Body
 from config import GRUNT_DAMAGE, GRUNT_REACH, GRUNT_ATTACK_SPEED, GRUNT_HIT_FRAME, GRUNT_ATTACK_COOL
 from enemy import Enemy
@@ -117,9 +116,7 @@ class Grunt(Enemy):
             self.set_state('wander')
             self.goal = None
 
-    def update(self):
-        super().update()
-        dt = game_framework.frame_time
+    def think(self, dt):
         sees = self.target is not None and self.can_see(self.target)
         if sees and self.state in ('wander', 'search'):
             self.set_state('chase')

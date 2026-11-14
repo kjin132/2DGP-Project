@@ -1,6 +1,7 @@
 """적 공통: 맵 위를 걷고, 맞으면 느려지고, 쓰러지면 가진 UI 를 떨어뜨린다 (PRD 2.5)"""
 import math
 import game_framework
+import game_world
 import camera
 import shadow
 import enemy_sprites
@@ -13,6 +14,8 @@ class Enemy(Body):
     who = None              # 스프라이트 묶음 이름 ('thief' / 'grunt')
     max_hp = 30
     target = None           # 쫓을 대상(보안관), play_mode 가 채워 줌
+    group = []              # 살아 있는 적 목록 (총알·미니맵이 함께 씀), play_mode 가 채워 줌
+    CORPSE_TIME = 1.2       # 쓰러진 뒤 사라지기까지
 
     def __init__(self, x, y):
         self.x, self.y = x, y
@@ -97,8 +100,19 @@ class Enemy(Body):
         if not self.alive:
             return
         self.hp -= damage
+        if self.hp <= 0:
+            self.die()
+            return
         self.slow_t = HIT_SLOW_TIME           # 맞으면 1.5초 동안 절반 속도 (PRD 2.5)
         self.flash_t = 0.12
+
+    def die(self):
+        self.hp = 0
+        self.set_state('dead')
+        self.moving = False
+        self.path = []
+        if self in Enemy.group:
+            Enemy.group.remove(self)
 
     def set_state(self, s):
         if s != self.state:
@@ -110,10 +124,22 @@ class Enemy(Body):
         self.t += dt
         self.slow_t = max(0.0, self.slow_t - dt)
         self.flash_t = max(0.0, self.flash_t - dt)
+        if self.state == 'dead':
+            death = self.sprites['death']
+            if self.t > death.duration + self.CORPSE_TIME:
+                game_world.remove_object(self)
+            return
+        self.think(dt)
+
+    def think(self, dt):
+        """적마다 하는 행동 (하위 클래스에서 정함)"""
+        pass
 
     # ---------- 그리기 ----------
     def sheet(self):
         """지금 그릴 시트와 좌우 반전 여부"""
+        if self.state == 'dead':
+            return self.sprites['death'], self.facing == 'left'
         if self.facing == 'up':
             return self.sprites['walk_back'], False
         if self.facing == 'down':
@@ -122,13 +148,22 @@ class Enemy(Body):
 
     def draw(self):
         sx, sy = camera.to_screen(self.x, self.y)
-        shadow.draw(sx, sy + 2, 46 * camera.Z)
         sheet, flip = self.sheet()
+        fade = 1.0
+        if self.state == 'dead':                 # 다 쓰러진 뒤 서서히 사라짐
+            over = self.t - sheet.duration
+            fade = max(0.0, 1 - over / self.CORPSE_TIME) if over > 0 else 1.0
+            if fade < 1:
+                sheet.image.opacify(fade)
+        else:
+            shadow.draw(sx, sy + 2, 46 * camera.Z)
         if self.flash_t > 0:
             sheet.image.opacify(0.45)
         sheet.draw(self.frame(sheet), sx, sy, CHAR_SCALE * camera.Z, flip)
-        if self.flash_t > 0:
+        if self.flash_t > 0 or fade < 1:
             sheet.image.opacify(1.0)
 
     def frame(self, sheet):
+        if self.state == 'dead':
+            return sheet.frame_at(self.t)
         return sheet.frame_at(self.t) if self.moving else 0     # 서 있을 때는 걷기 첫 장면
