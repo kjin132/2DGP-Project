@@ -29,6 +29,7 @@ class Enemy(Body):
         self.moving = False
         self.path = []                # 길찾기로 잡은 지점 목록
         self.path_goal = None
+        self.stuck_t = 0.0            # 길을 따라가는데 못 움직인 시간
         self.slow_t = 0.0             # 0 보다 크면 맞아서 느려진 상태
         self.flash_t = 0.0            # 맞은 순간 잠깐 반투명하게
         self.carried = None           # 주운(또는 훔친) 내 UI — 머리 위에 들고 다님
@@ -88,6 +89,10 @@ class Enemy(Body):
         tx, ty = self.path[0]
         if self.step_toward(tx, ty, dt, speed) or math.hypot(tx - self.x, ty - self.y) < 6:
             self.path.pop(0)
+        self.stuck_t = 0.0 if self.moving else self.stuck_t + dt
+        if self.stuck_t > 0.4 and self.path_goal:      # 걸려서 못 가면 지금 자리에서 길을 다시 잡음
+            self.stuck_t = 0.0
+            self.go_to(*self.path_goal)
         return not self.path
 
     # ---------- 피격 ----------
