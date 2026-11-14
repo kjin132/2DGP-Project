@@ -36,6 +36,7 @@ class Player(Body):
         self.hands = [None, None]                 # 손 슬롯 2칸
         self.selected = 0                         # 1/2 키로 고른 슬롯
         self.hurt_t = 0.0                         # 0 보다 크면 맞은 직후 무적
+        self.walk_t = 0.0                         # 걷기 동작 시간 (무거우면 천천히 흐름)
 
     # ---------- 입력 ----------
     def handle_event(self, e):
@@ -222,6 +223,7 @@ class Player(Body):
             n = math.hypot(dx, dy)
             v = self.speed()
             self.try_move(dx / n * v * dt, dy / n * v * dt)
+            self.walk_t += dt * v / PLAYER_SPEED     # 느려지면 발걸음도 느리게
             self.clamp_to_map()
             if dx:
                 self.facing = 'right' if dx > 0 else 'left'
@@ -261,4 +263,5 @@ class Player(Body):
             sheet.draw(sheet.frame_at(self.t * 2), sx, sy, scale, self.facing == 'left')
             return
         sheet = self.sprites[f'{self.state}_{suffix}']
-        sheet.draw(sheet.frame_at(self.t), sx, sy, scale, flip)
+        t = self.walk_t if self.state == 'walk' else self.t
+        sheet.draw(sheet.frame_at(t), sx, sy, scale, flip)
