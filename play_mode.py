@@ -83,12 +83,25 @@ def init():
     game_world.add_object(player, 1)
     Enemy.target = player
     Thief.exit_gate = exit_gate
+    Thief.on_steal = on_thief_steal
+    Thief.on_escape = on_thief_escape
     thieves = ThiefDirector(player, stage1.THIEF_SPAWNS)
     game_world.add_object(thieves, 0)
     hud = HUD(player, items, pedestals, f'{stage1.FOLDER}/minimap.png', background.pixel_w, background.pixel_h)
     hud.score = score
     game_world.add_object(hud, 2)
     hide_cursor()      # 마우스 커서 대신 조준선 UI 가 있어야 조준점이 보임
+
+
+def on_thief_steal(thief, item):
+    hud.alert(f'{item.name} 도난!')
+
+
+def on_thief_escape(thief, item):
+    """도둑이 UI 를 들고 나가면 그 UI 는 이 스테이지에서 잃고 500점 깎임 (점수판이 없어도)"""
+    score.penalty(500)
+    name = item.name if item else 'UI'
+    hud.alert(f'도둑이 {name}를 가지고 달아났다!  -500', (255, 120, 90), 3.5)
 
 
 def finish():

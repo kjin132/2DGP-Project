@@ -1,5 +1,6 @@
 """켜져 있는(손에 들었거나 거치대에 올린) UI 만 화면에 그리는 HUD"""
 from pico2d import load_image, load_font
+import game_framework
 import camera
 from config import SCREEN_W, SCREEN_H, MAX_HP
 
@@ -37,7 +38,6 @@ class HUD:
         self.alerts.append([text, color, time])
 
     def update(self):
-        import game_framework
         for a in self.alerts:
             a[2] -= game_framework.frame_time
         self.alerts = [a for a in self.alerts if a[2] > 0]
