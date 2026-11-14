@@ -3,6 +3,7 @@ import math
 import game_framework
 import game_world
 import camera
+from effects import Shards
 from config import THROW_SPEED, THROW_RANGE, THROW_DAMAGE
 
 
@@ -42,6 +43,7 @@ class ThrownUI:
 
     def shatter(self):
         game_world.remove_object(self)
+        game_world.add_object(Shards(self.item.image, self.x, self.y, self.height), 1)
 
     def draw(self):
         sx, sy = camera.to_screen(self.x, self.y + self.height)
