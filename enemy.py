@@ -15,6 +15,8 @@ class Enemy(Body):
     max_hp = 30
     target = None           # 쫓을 대상(보안관), play_mode 가 채워 줌
     group = []              # 살아 있는 적 목록 (총알·미니맵이 함께 씀), play_mode 가 채워 줌
+    score = None            # 점수 (play_mode 가 채워 줌)
+    points = 100            # 쓰러뜨리면 받는 기본 점수
     CORPSE_TIME = 1.2       # 쓰러진 뒤 사라지기까지
 
     def __init__(self, x, y):
@@ -121,6 +123,8 @@ class Enemy(Body):
 
     def die(self):
         self.drop_carried()
+        if Enemy.score is not None:
+            Enemy.score.kill(self.points)
         self.hp = 0
         self.set_state('dead')
         self.moving = False

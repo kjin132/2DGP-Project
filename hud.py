@@ -25,7 +25,7 @@ class HUD:
         self.bullet = load_image('resources/effect/bullet.png')
         self.score_frame = _img('item_score_frame')
         self.dots = {k: _img('mm_' + k) for k in ('player', 'item', 'pedestal')}
-        self.score = 0
+        self.score = None            # 점수 (play_mode 가 채워 줌)
         self.slot = _img('slot')
 
     def active_kinds(self):
@@ -96,7 +96,7 @@ class HUD:
         h = self.score_frame.h * s
         cx, cy = SCREEN_W / 2, SCREEN_H - 12 - h / 2
         self.score_frame.draw(cx, cy, W, h)
-        text = f'{self.score:,}'
+        text = f'{self.score.value:,}'
         # 숫자는 SCORE 글자 아래 (그림 위쪽 기준 y 약 640)
         self.big_font.draw(cx - len(text) * 9.3, cy + h / 2 - 640 * s, text, (60, 30, 20))
 

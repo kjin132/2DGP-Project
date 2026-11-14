@@ -10,6 +10,7 @@ from enemy import Enemy
 class Grunt(Enemy):
     who = 'grunt'
     max_hp = 40
+    points = 100
     WANDER_RANGE = 350          # 처음 자리에서 이만큼 안에서 돌아다님
 
     def __init__(self, x, y):

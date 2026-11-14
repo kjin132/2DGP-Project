@@ -16,6 +16,7 @@ from enemy import Enemy
 import pathfind
 import random
 from exit_gate import ExitGate
+from score import Score
 import stage1
 import camera
 from config import SCREEN_H
@@ -27,6 +28,7 @@ pedestals = []
 hud = None
 enemies = []
 exit_gate = None
+score = None
 mouse_screen = (0, 0)     # 마우스 화면 좌표 (pico2d 기준, 아래가 0)
 
 
@@ -48,7 +50,7 @@ def handle_events():
 
 
 def init():
-    global player, background, items, pedestals, hud, enemies, exit_gate
+    global player, background, items, pedestals, hud, enemies, exit_gate, score
     background = Background(stage1.FOLDER)
     game_world.add_object(background, 0)
     camera.set_bounds(background.pixel_w, background.pixel_h)
@@ -62,6 +64,8 @@ def init():
     items = [ITEM_CLASSES[k](x, y) for k, x, y in stage1.build_items()]
     game_world.add_objects(items, 1)
     Player.items = UIItem.all = items
+    score = Score(items)
+    Enemy.score = score
     pedestals = [UIPedestal(x, y) for x, y in stage1.build_pedestals()]
     game_world.add_objects(pedestals, 1)
     Body.pedestals = pedestals
@@ -74,6 +78,7 @@ def init():
     game_world.add_object(player, 1)
     Enemy.target = player
     hud = HUD(player, items, pedestals, f'{stage1.FOLDER}/minimap.png', background.pixel_w, background.pixel_h)
+    hud.score = score
     game_world.add_object(hud, 2)
     hide_cursor()      # 마우스 커서 대신 조준선 UI 가 있어야 조준점이 보임
 
@@ -84,6 +89,7 @@ def finish():
 
 def update():
     game_world.update()
+    score.update()
     camera.follow(player.x, player.y + 40)
     player.set_aim(*camera.to_world(*mouse_screen))
     hud.mouse = mouse_screen   # 카메라가 움직여도 조준점이 마우스를 따라가게

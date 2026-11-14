@@ -43,6 +43,13 @@ class Score:
         self.value += gained
         return gained
 
+    def kill(self, base, window=COMBO_WINDOW):
+        """적 처치: 콤보를 잇고 점수를 더함"""
+        self.combo = self.combo + 1 if self.combo_t > 0 else 1
+        self.max_combo = max(self.max_combo, self.combo)
+        self.combo_t = window
+        return self.add(base)
+
     def penalty(self, amount):
         """점수판과 관계없이 깎임"""
         self.value = max(0, self.value - amount)
