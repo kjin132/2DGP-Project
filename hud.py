@@ -123,6 +123,8 @@ class HUD:
                 item.image.draw(cx, y, item.image.w * k, item.image.h * k)
             self.font.draw(cx - size / 2 + 4, y + size / 2 - 10, str(i + 1), (255, 235, 180) if sel else (170, 160, 140))
         self.slot.opacify(1.0)
+        if self.player.hands[self.player.selected]:      # 고른 칸에 UI 가 있으면 쓸 수 있는 키 안내
+            self.font.draw(x0 + 2 * size + gap + 12, y, 'F 먹기  Q 던지기', (255, 235, 180))
 
     def draw_prompt(self):
         """E 키 안내: 가까운 대상 위에 "E: 줍기" 같은 문구"""
