@@ -19,6 +19,8 @@ class Score:
         self.combo_t = 0.0
         self.max_combo = 0
         self.clock = 0.0            # 스테이지 시작부터 흐른 시간
+        self.kills = 0              # 쓰러뜨린 적 수 (결과 화면용)
+        self.recovered = 0          # 도둑에게서 되찾은 UI 수 (결과 화면용)
         self.chasing = lambda: False   # 도둑이 UI 를 들고 달아나는 중인지, play_mode 가 채워 줌
 
     # ---------- 켜진 UI ----------
@@ -53,6 +55,7 @@ class Score:
 
     def kill(self, base, x, y):
         """적 처치: 콤보를 잇고 점수를 더함. 얻은 점수를 그 자리에 띄움"""
+        self.kills += 1
         self.combo = self.combo + 1 if self.combo_t > 0 else 1
         self.max_combo = max(self.max_combo, self.combo)
         self.combo_t = CHASE_COMBO_WINDOW if self.chasing() else COMBO_WINDOW

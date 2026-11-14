@@ -138,6 +138,7 @@ def on_recover(item):
     fast = score.clock - item.stolen_at <= 5.0
     by_trail = not item.seen_on_map          # 미니맵 없이 빛 흔적만 따라가 되찾음
     item.stolen_at = None
+    score.recovered += 1
     base = 300 + (200 if fast else 0) + (300 if by_trail else 0)
     gained = score.add(base)
     text = f'{item.name} {"빠른 " if fast else ""}회수!'
