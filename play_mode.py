@@ -192,7 +192,8 @@ def update():
     player.set_aim(*camera.to_world(*mouse_screen))
     hud.mouse = mouse_screen   # 카메라가 움직여도 조준점이 마우스를 따라가게
     if exit_gate.reached(player):
-        end_stage('clear', [f'{exit_gate.name} 출구로 빠져나왔다'])
+        bonus = clear_bonus()
+        end_stage('clear', [f'{exit_gate.name} 출구로 빠져나왔다', f'끝까지 지킨 UI 보너스 +{bonus}'])
     elif player.hp <= 0:
         end_stage('gameover', ['보안관이 쓰러졌다'])
 
@@ -205,6 +206,18 @@ def draw():
     clear_canvas()
     draw_world()
     update_canvas()
+
+
+def kept_items():
+    """끝까지 지킨 내 UI: 손에 들었거나 거치대에 올려 둔 것 (적 UI 는 빼고)"""
+    return [i for i in items if i.owner in ('player', 'pedestal') and not i.is_enemy_ui]
+
+
+def clear_bonus():
+    """스테이지 클리어: 남은 UI 1개당 +300, 내구도 100% 인 UI 1개당 +200 더 (PRD 2.9)"""
+    kept = kept_items()
+    base = 300 * len(kept) + 200 * sum(1 for i in kept if i.durability >= 100)
+    return score.add(base)
 
 
 def end_stage(kind, lines):
