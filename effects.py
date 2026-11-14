@@ -4,7 +4,7 @@ import random
 import game_framework
 import game_world
 import camera
-from pico2d import load_font
+from pico2d import load_font, load_image
 from config import ITEM_WORLD_SIZE
 
 
@@ -83,9 +83,11 @@ class FloatText:
 class TrailSpark:
     """도둑이 들고 가는 UI 에서 떨어지는 빛 조각: 바닥에 남아 몇 초 동안 반짝이다 사라짐 (PRD 2.10 추격)"""
     LIFE = 5.0
+    image = None
 
-    def __init__(self, image, x, y):
-        self.image = image
+    def __init__(self, x, y):
+        if TrailSpark.image is None:
+            TrailSpark.image = load_image('resources/effect/spark.png')
         self.x, self.y = x + random.uniform(-8, 8), y + random.uniform(-6, 6)
         self.t = 0.0
         self.phase = random.uniform(0, math.tau)

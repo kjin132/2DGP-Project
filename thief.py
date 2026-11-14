@@ -110,7 +110,7 @@ class Thief(Enemy):
         self.trail_t -= dt
         if self.trail_t <= 0 and self.carried is not None and Thief.leave_trail and Thief.leave_trail():
             self.trail_t = self.TRAIL_GAP
-            game_world.add_object(TrailSpark(self.carried.glow, self.x, self.y), 1)
+            game_world.add_object(TrailSpark(self.x, self.y), 1)
 
     def escape(self):
         item, self.carried = self.carried, None
