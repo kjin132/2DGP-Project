@@ -123,7 +123,11 @@ class HUD:
         for e in self.enemies:                  # 적 위치 (PRD 2.3 미니맵: 적 위치)
             if e.who != 'thief':
                 self.dots['enemy'].draw(mx(e.x), my(e.y), 7, 7)
-        if self.exit_gate is not None:          # 출구 (화면 밖의 출구는 미니맵에만 보임, PRD 2.12)
+        for e in self.enemies:                  # 도둑은 크게 깜빡이며 (미니맵이 있으면 추적 가능, PRD 2.10)
+            if e.who == 'thief':
+                s = 12 if int(self.t * 5) % 2 else 9
+                self.dots['thief'].draw(mx(e.x), my(e.y), s, s)
+        if self.exit_gate is not None:          # 출구 (화면 밖의 출구는 미니맵에만 보임, PRD 2.8.1)
             g = self.exit_gate
             s = 13 + 2 * math.sin(self.t * 4)
             self.dots['exit'].draw(mx(g.x), my(g.y), s, s)
