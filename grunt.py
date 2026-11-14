@@ -1,5 +1,6 @@
 """갱단원 (Grunt): 플레이어에게 다가와 칼로 근접 공격 (PRD 2.5)"""
 import random
+import game_framework
 from enemy import Enemy
 
 
@@ -37,6 +38,6 @@ class Grunt(Enemy):
 
     def update(self):
         super().update()
-        from game_framework import frame_time as dt
+        dt = game_framework.frame_time
         if self.state == 'wander':
             self.wander(dt)
