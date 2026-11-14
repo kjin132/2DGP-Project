@@ -128,6 +128,19 @@ def on_receive(item):
     if not item.claimed:
         item.claimed = True
         on_claim(item)
+    if item.stolen_at is not None:
+        on_recover(item)
+
+
+def on_recover(item):
+    """도둑에게 빼앗긴 UI 를 되찾음: +300 (PRD 2.10 추격 보상)"""
+    item.stolen_at = None
+    gained = score.add(300)
+    text = f'{item.name} 회수!'
+    if gained:
+        text += f'  +{gained}'
+        score.popup(player.x, player.y + 20, f'+{gained}', (140, 255, 160))
+    hud.alert(text, (140, 255, 160), 3.0)
 
 
 def on_claim(item):
@@ -145,6 +158,7 @@ def on_thief_appear(thief):
 
 
 def on_thief_steal(thief, item):
+    item.stolen_at = score.clock
     hud.alert(f'{item.name} 도난!')
 
 
