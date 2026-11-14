@@ -16,6 +16,7 @@ class HUD:
         self.mouse = (0, 0)
         self.font = load_font('resources/font/Galmuri11.ttf', 22)
         self.big_font = load_font('resources/font/Galmuri11.ttf', 33)
+        self.alert_font = load_font('resources/font/Galmuri11.ttf', 30)
         self.hp_frame, self.hp_fill = _img('item_hp_frame'), _img('item_hp_fill')
         self.minimap = _img('item_minimap')
         self.crosshair = _img('item_crosshair')
@@ -27,12 +28,28 @@ class HUD:
         self.dots = {k: _img('mm_' + k) for k in ('player', 'item', 'pedestal')}
         self.score = None            # 점수 (play_mode 가 채워 줌)
         self.slot = _img('slot')
+        self.alerts = []                    # 화면 가운데 위에 잠깐 뜨는 알림 [글자, 색, 남은 시간]
 
     def active_kinds(self):
         return {i.kind for i in self.items if i.active and not i.is_fake}
 
+    def alert(self, text, color=(255, 90, 70), time=2.5):
+        self.alerts.append([text, color, time])
+
     def update(self):
-        pass
+        import game_framework
+        for a in self.alerts:
+            a[2] -= game_framework.frame_time
+        self.alerts = [a for a in self.alerts if a[2] > 0]
+
+    def draw_alerts(self):
+        y = SCREEN_H - 190
+        for text, color, left in self.alerts[-3:]:
+            if left < 0.6 and int(left * 10) % 2:          # 사라지기 전 깜빡임
+                continue
+            w = sum(30 if ord(ch) > 0x2E80 else 15 for ch in text)
+            self.alert_font.draw(SCREEN_W / 2 - w / 2, y, text, color)
+            y -= 40
 
     # ---------- 각 UI ----------
     def draw_hp(self):
@@ -145,6 +162,7 @@ class HUD:
         self.font.draw(sx - len(text) * 6, sy + 110 * camera.Z, text, (255, 240, 200))
 
     def draw(self):
+        self.draw_alerts()
         self.draw_slots()
         self.draw_prompt()
         kinds = self.active_kinds()
