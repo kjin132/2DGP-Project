@@ -4,6 +4,7 @@ import game_framework
 import camera
 import shadow
 import enemy_sprites
+import pathfind
 from body import Body
 from config import CHAR_SCALE, PLAYER_SPEED, ENEMY_SPEED_MUL, VIEW_DIST, VIEW_ANGLE
 
@@ -21,6 +22,8 @@ class Enemy(Body):
         self.state = 'wander'
         self.t = 0.0                  # 지금 동작의 재생 시간
         self.moving = False
+        self.path = []                # 길찾기로 잡은 지점 목록
+        self.path_goal = None
 
     # ---------- 이동 ----------
     def speed(self):
@@ -61,6 +64,22 @@ class Enemy(Body):
             if cos < math.cos(math.radians(VIEW_ANGLE / 2)):
                 return False
         return Body.collision is None or Body.collision.line_clear(self.x, self.y + 10, who.x, who.y + 10)
+
+    # ---------- 길 따라가기 ----------
+    def go_to(self, tx, ty):
+        """(tx, ty) 까지 건물을 돌아가는 길을 새로 잡음"""
+        self.path = pathfind.nav.find(self.x, self.y, tx, ty) if pathfind.nav else [(tx, ty)]
+        self.path_goal = (tx, ty)
+        return self.path is not None
+
+    def follow_path(self, dt, speed=None):
+        """잡아 둔 길을 따라 한 프레임 이동. 끝까지 갔으면 True"""
+        if not self.path:
+            return True
+        tx, ty = self.path[0]
+        if self.step_toward(tx, ty, dt, speed) or math.hypot(tx - self.x, ty - self.y) < 6:
+            self.path.pop(0)
+        return not self.path
 
     def set_state(self, s):
         if s != self.state:

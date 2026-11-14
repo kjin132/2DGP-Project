@@ -11,6 +11,7 @@ from ui_item import ITEM_CLASSES
 from pedestal import UIPedestal
 from hud import HUD
 from grunt import Grunt
+import pathfind
 import stage1
 import camera
 from config import SCREEN_H
@@ -49,6 +50,7 @@ def init():
     overlays = OverlaySet(stage1.FOLDER)
     game_world.extra_sources.append(overlays.visible)    # 건물 윗부분이 캐릭터를 가리게
     Body.collision = Bullet.collision = collision
+    pathfind.build(collision)          # 적 길찾기 격자 (맵마다 한 번)
     items = [ITEM_CLASSES[k](x, y) for k, x, y in stage1.build_items()]
     game_world.add_objects(items, 1)
     Player.items = items
