@@ -41,3 +41,8 @@ GRUNT_REACH = 58           # 이 거리 안(가로)에 들어오면 칼을 휘�
 GRUNT_ATTACK_SPEED = 2.0   # 공격 동작 재생 배속
 GRUNT_HIT_FRAME = 21       # 칼이 앞으로 나가는 장면 (이때 맞음)
 GRUNT_ATTACK_COOL = 0.6    # 한 번 휘두른 뒤 쉬는 시간
+
+# UI 던지기 (Q)
+THROW_SPEED = 650
+THROW_RANGE = 420          # 이만큼 날아가면 떨어져 부서짐
+THROW_DAMAGE = 35          # 총알 3~4발 정도의 강한 공격

@@ -7,6 +7,7 @@ from background import Background
 from collision import CollisionMap
 from overlay import OverlaySet
 from bullet import Bullet
+from thrown_ui import ThrownUI
 from ui_item import ITEM_CLASSES, UIItem
 from pedestal import UIPedestal
 from hud import HUD
@@ -50,7 +51,7 @@ def init():
     collision = CollisionMap(stage1.FOLDER)
     overlays = OverlaySet(stage1.FOLDER)
     game_world.extra_sources.append(overlays.visible)    # 건물 윗부분이 캐릭터를 가리게
-    Body.collision = Bullet.collision = collision
+    Body.collision = Bullet.collision = ThrownUI.collision = collision
     pathfind.build(collision)          # 적 길찾기 격자 (맵마다 한 번)
     items = [ITEM_CLASSES[k](x, y) for k, x, y in stage1.build_items()]
     game_world.add_objects(items, 1)
@@ -62,7 +63,7 @@ def init():
     enemies = [Grunt(x, y) for x, y in stage1.build_grunts()]
     game_world.add_objects(enemies, 1)
     Enemy.group = enemies
-    Bullet.targets = enemies
+    Bullet.targets = ThrownUI.targets = enemies
     player = Player(*stage1.PLAYER_START)
     game_world.add_object(player, 1)
     Enemy.target = player

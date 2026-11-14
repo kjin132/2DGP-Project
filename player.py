@@ -6,6 +6,7 @@ import camera
 import sheriff_sprites
 import shadow
 from bullet import Bullet
+from thrown_ui import ThrownUI
 from body import Body
 from config import (CHAR_SCALE, PLAYER_SPEED, DASH_TIME, DASH_SPEED, DASH_COOLDOWN,
                     MAX_AMMO, RELOAD_TIME, FIRE_INTERVAL, PICK_RANGE, MAX_HP, HURT_INVINCIBLE,
@@ -54,6 +55,8 @@ class Player(Body):
             self.interact()
         elif e.type == SDL_KEYDOWN and e.key == SDLK_f:
             self.eat()
+        elif e.type == SDL_KEYDOWN and e.key == SDLK_q:
+            self.throw()
 
     # ---------- UI 줍기 / 내려놓기 ----------
     items = []          # 맵의 UI 목록, play_mode 가 채워 줌
@@ -137,6 +140,16 @@ class Player(Body):
         self.hands[self.selected] = None
         item.destroy()
         self.set_state('pickup')
+
+    def throw(self):
+        """선택한 슬롯의 UI 를 마우스 쪽으로 던짐 (Q). 던진 UI 는 이 스테이지에서 사라짐"""
+        item = self.hands[self.selected]
+        if item is None or self.state in ('dash', 'pickup'):
+            return
+        self.hands[self.selected] = None
+        item.destroy()
+        self.facing = 'right' if self.aim_x >= self.x else 'left'
+        game_world.add_object(ThrownUI(item, self.x, self.y, self.aim_x, self.aim_y - GUN_HEIGHT), 1)
 
     def put_down(self, item, x, y):
         item.owner = 'floor'
