@@ -177,7 +177,7 @@ class Enemy(Body):
         if self.flash_t > 0 or fade < 1:
             sheet.image.opacify(1.0)
         if self.carried is not None:              # 들고 있는 UI 를 머리 위에 (누가 가져갔는지 보이게)
-            self.carried.draw_at(sx, sy + 84 * camera.Z)
+            self.carried.draw_at(sx, sy + 84 * camera.Z, ground=False)
 
     def frame(self, sheet):
         if self.state == 'dead':

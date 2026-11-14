@@ -53,13 +53,15 @@ class UIItem:
         except ValueError:
             pass
 
-    def draw_at(self, sx, sy, glow=True):
-        """화면 좌표 (sx, sy) 를 바닥점으로 해서 그림. 빛은 은은하게 깜빡임"""
+    def draw_at(self, sx, sy, glow=True, ground=True):
+        """화면 좌표 (sx, sy) 를 바닥점으로 해서 그림. 빛은 은은하게 깜빡임.
+        ground=False 면 그림자 없이 (적이 머리 위에 들고 있을 때)"""
         Z = camera.Z
         bob = math.sin(self.t * 3) * 3
         w, h = self.w * Z, self.h * Z
         cy = sy + h / 2 + (6 + bob) * Z
-        shadow.draw(sx, sy, w * (0.75 - bob * 0.02))     # 떠 있을수록 그림자가 작아짐
+        if ground:
+            shadow.draw(sx, sy, w * (0.75 - bob * 0.02))     # 떠 있을수록 그림자가 작아짐
         if glow:
             self.glow.opacify(0.55 + 0.45 * math.sin(self.t * 4))
             self.glow.draw(sx, cy, w, h)
