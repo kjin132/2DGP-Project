@@ -86,6 +86,7 @@ def init():
     Thief.on_steal = on_thief_steal
     Thief.on_escape = on_thief_escape
     thieves = ThiefDirector(player, stage1.THIEF_SPAWNS)
+    thieves.on_appear = on_thief_appear
     game_world.add_object(thieves, 0)
     hud = HUD(player, items, pedestals, f'{stage1.FOLDER}/minimap.png', background.pixel_w, background.pixel_h)
     hud.score = score
@@ -99,6 +100,11 @@ def eul(word):
     if '가' <= ch <= '힣':
         return word + ('을' if (ord(ch) - 0xAC00) % 28 else '를')
     return word + '를'
+
+
+def on_thief_appear(thief):
+    hud.alert('무법자 도둑 출현!', (255, 200, 80), 3.0)
+    hud.point_at(thief)
 
 
 def on_thief_steal(thief, item):

@@ -1,5 +1,6 @@
 """켜져 있는(손에 들었거나 거치대에 올린) UI 만 화면에 그리는 HUD"""
 from pico2d import load_image, load_font
+import math
 import game_framework
 import camera
 from config import SCREEN_W, SCREEN_H, MAX_HP
@@ -30,6 +31,8 @@ class HUD:
         self.score = None            # 점수 (play_mode 가 채워 줌)
         self.slot = _img('slot')
         self.alerts = []                    # 화면 가운데 위에 잠깐 뜨는 알림 [글자, 색, 남은 시간]
+        self.arrow = _img('arrow')
+        self.pointers = []                  # 화면 밖 대상을 가리키는 화살표 [대상, 남은 시간]
 
     def active_kinds(self):
         return {i.kind for i in self.items if i.active and not i.is_fake}
@@ -41,7 +44,26 @@ class HUD:
         for a in self.alerts:
             a[2] -= game_framework.frame_time
         self.alerts = [a for a in self.alerts if a[2] > 0]
+        for p in self.pointers:
+            p[1] -= game_framework.frame_time
+        self.pointers = [p for p in self.pointers if p[1] > 0 and p[0].alive]
 
+    def point_at(self, target, time=4.0):
+        self.pointers.append([target, time])
+
+    def draw_pointers(self):
+        """화면 밖에 있는 대상 쪽 화면 가장자리에 깜빡이는 화살표"""
+        for target, left in self.pointers:
+            if int(left * 4) % 2:
+                continue
+            sx, sy = camera.to_screen(target.x, target.y + 40)
+            if 0 <= sx <= SCREEN_W and 0 <= sy <= SCREEN_H:
+                continue                                    # 화면 안에 보이면 화살표 없음
+            cx, cy = SCREEN_W / 2, SCREEN_H / 2
+            a = math.atan2(sy - cy, sx - cx)
+            m = 50
+            k = min((SCREEN_W / 2 - m) / max(abs(math.cos(a)), 1e-6), (SCREEN_H / 2 - m) / max(abs(math.sin(a)), 1e-6))
+            self.arrow.composite_draw(a, '', cx + math.cos(a) * k, cy + math.sin(a) * k, 56, 56)
     def draw_alerts(self):
         y = SCREEN_H - 190
         for text, color, left in self.alerts[-3:]:
@@ -162,6 +184,7 @@ class HUD:
         self.font.draw(sx - len(text) * 6, sy + 110 * camera.Z, text, (255, 240, 200))
 
     def draw(self):
+        self.draw_pointers()
         self.draw_alerts()
         self.draw_slots()
         self.draw_prompt()
