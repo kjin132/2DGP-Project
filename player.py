@@ -150,6 +150,8 @@ class Player(Body):
         item.destroy()
         self.facing = 'right' if self.aim_x >= self.x else 'left'
         game_world.add_object(ThrownUI(item, self.x, self.y, self.aim_x, self.aim_y - GUN_HEIGHT), 1)
+        if self.state in ('idle', 'shoot'):          # 서서 던지면 팔을 뻗는 사격 동작으로
+            self.state, self.t = 'shoot', 0.0
 
     def put_down(self, item, x, y):
         item.owner = 'floor'
