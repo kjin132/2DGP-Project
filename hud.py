@@ -16,6 +16,7 @@ class HUD:
         self.map_image = load_image(map_image)       # 맵 그림을 줄인 것
         self.map_w, self.map_h = map_w, map_h
         self.mouse = (0, 0)
+        self.t = 0.0
         self.font = load_font('resources/font/Galmuri11.ttf', 22)
         self.big_font = load_font('resources/font/Galmuri11.ttf', 33)
         self.alert_font = load_font('resources/font/Galmuri11.ttf', 30)
@@ -43,6 +44,7 @@ class HUD:
         self.alerts.append([text, color, time])
 
     def update(self):
+        self.t += game_framework.frame_time
         for a in self.alerts:
             a[2] -= game_framework.frame_time
         self.alerts = [a for a in self.alerts if a[2] > 0]
@@ -121,6 +123,10 @@ class HUD:
         for e in self.enemies:                  # 적 위치 (PRD 2.3 미니맵: 적 위치)
             if e.who != 'thief':
                 self.dots['enemy'].draw(mx(e.x), my(e.y), 7, 7)
+        if self.exit_gate is not None:          # 출구 (화면 밖의 출구는 미니맵에만 보임, PRD 2.12)
+            g = self.exit_gate
+            s = 13 + 2 * math.sin(self.t * 4)
+            self.dots['exit'].draw(mx(g.x), my(g.y), s, s)
         self.dots['player'].draw(mx(self.player.x), my(self.player.y), 10, 10)
 
     def draw_ammo(self):
