@@ -70,7 +70,10 @@ class HUD:
             if left < 0.6 and int(left * 10) % 2:          # 사라지기 전 깜빡임
                 continue
             w = sum(30 if ord(ch) > 0x2E80 else 15 for ch in text)
-            self.alert_font.draw(SCREEN_W / 2 - w / 2, y, text, color)
+            x = SCREEN_W / 2 - w / 2
+            for ox, oy in ((-2, 0), (2, 0), (0, -2), (0, 2)):     # 어두운 테두리 (배경·캐릭터 위에서도 읽히게)
+                self.alert_font.draw(x + ox, y + oy, text, (40, 20, 10))
+            self.alert_font.draw(x, y, text, color)
             y -= 40
 
     # ---------- 각 UI ----------
