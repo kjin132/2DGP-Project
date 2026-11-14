@@ -133,10 +133,12 @@ def on_receive(item):
 
 
 def on_recover(item):
-    """도둑에게 빼앗긴 UI 를 되찾음: +300 (PRD 2.10 추격 보상)"""
+    """도둑에게 빼앗긴 UI 를 되찾음: +300, 5초 안에 되찾으면 +200 더 (PRD 2.10 추격 보상)"""
+    fast = score.clock - item.stolen_at <= 5.0
     item.stolen_at = None
-    gained = score.add(300)
-    text = f'{item.name} 회수!'
+    base = 300 + (200 if fast else 0)
+    gained = score.add(base)
+    text = f'{item.name} {"빠른 " if fast else ""}회수!'
     if gained:
         text += f'  +{gained}'
         score.popup(player.x, player.y + 20, f'+{gained}', (140, 255, 160))
