@@ -9,7 +9,7 @@ from bullet import Bullet
 from body import Body
 from config import (CHAR_SCALE, PLAYER_SPEED, DASH_TIME, DASH_SPEED, DASH_COOLDOWN,
                     MAX_AMMO, RELOAD_TIME, FIRE_INTERVAL, PICK_RANGE, MAX_HP, HURT_INVINCIBLE,
-                    WEIGHT_SPEED)
+                    WEIGHT_SPEED, EAT_AMOUNT)
 
 GUN_HEIGHT = 56        # 발에서 총구까지 높이 (화면 px)
 GUN_REACH = 38         # 몸 중심에서 총구까지 가로 거리
@@ -52,6 +52,8 @@ class Player(Body):
             self.selected = 0 if e.key == SDLK_1 else 1
         elif e.type == SDL_KEYDOWN and e.key == SDLK_e:
             self.interact()
+        elif e.type == SDL_KEYDOWN and e.key == SDLK_f:
+            self.eat()
 
     # ---------- UI 줍기 / 내려놓기 ----------
     items = []          # 맵의 UI 목록, play_mode 가 채워 줌
@@ -122,6 +124,19 @@ class Player(Body):
             ped.place(self.hands[slot])
         item.owner = 'player'
         self.hands[slot] = item
+
+    def eat(self):
+        """선택한 슬롯의 UI 먹기 (F): 내 UI 는 체력 회복, 적 UI·가짜 UI 는 체력 감소. 먹은 UI 는 사라짐"""
+        item = self.hands[self.selected]
+        if item is None or self.state in ('dash', 'pickup'):
+            return
+        if item.is_fake or item.is_enemy_ui:
+            self.hp = max(0, self.hp - EAT_AMOUNT)
+        else:
+            self.hp = min(MAX_HP, self.hp + EAT_AMOUNT)
+        self.hands[self.selected] = None
+        item.destroy()
+        self.set_state('pickup')
 
     def put_down(self, item, x, y):
         item.owner = 'floor'

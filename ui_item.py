@@ -1,6 +1,7 @@
 import math
 from pico2d import load_image
 import game_framework
+import game_world
 import camera
 import shadow
 from config import ITEM_WORLD_SIZE
@@ -21,6 +22,8 @@ class UIItem:
     kind = 'base'
     name = 'UI'
     icon = None            # resources/ui 의 그림 이름 (빛 있는 버전은 _glow)
+    is_enemy_ui = False    # 적 UI (적 HP 바, 적 경보등)
+    all = []               # 지금 스테이지의 UI 전부 (HUD·보안관·적이 함께 봄), play_mode 가 채워 줌
 
     def __init__(self, x, y):
         self.x, self.y = x, y
@@ -39,6 +42,16 @@ class UIItem:
 
     def update(self):
         self.t += game_framework.frame_time
+
+    def destroy(self):
+        """먹거나 던져서 부서짐: 이 스테이지에서 완전히 사라짐"""
+        self.owner = 'gone'
+        if self in UIItem.all:
+            UIItem.all.remove(self)
+        try:
+            game_world.remove_object(self)
+        except ValueError:
+            pass
 
     def draw_at(self, sx, sy, glow=True):
         """화면 좌표 (sx, sy) 를 바닥점으로 해서 그림. 빛은 은은하게 깜빡임"""

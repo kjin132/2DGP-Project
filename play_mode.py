@@ -7,7 +7,7 @@ from background import Background
 from collision import CollisionMap
 from overlay import OverlaySet
 from bullet import Bullet
-from ui_item import ITEM_CLASSES
+from ui_item import ITEM_CLASSES, UIItem
 from pedestal import UIPedestal
 from hud import HUD
 from grunt import Grunt
@@ -54,7 +54,7 @@ def init():
     pathfind.build(collision)          # 적 길찾기 격자 (맵마다 한 번)
     items = [ITEM_CLASSES[k](x, y) for k, x, y in stage1.build_items()]
     game_world.add_objects(items, 1)
-    Player.items = items
+    Player.items = UIItem.all = items
     pedestals = [UIPedestal(x, y) for x, y in stage1.build_pedestals()]
     game_world.add_objects(pedestals, 1)
     Body.pedestals = pedestals
