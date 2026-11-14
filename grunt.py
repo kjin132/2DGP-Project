@@ -1,8 +1,8 @@
 """갱단원 (Grunt): 플레이어에게 다가와 칼로 근접 공격 (PRD 2.5)"""
-import math
 import random
 import game_framework
 from body import Body
+from config import GRUNT_DAMAGE, GRUNT_REACH, GRUNT_ATTACK_SPEED, GRUNT_HIT_FRAME, GRUNT_ATTACK_COOL
 from enemy import Enemy
 
 
@@ -18,6 +18,8 @@ class Grunt(Enemy):
         self.wait = random.uniform(0.3, 1.5)
         self.last_seen = None           # 마지막으로 본 보안관 위치
         self.replan = 0.0               # 길 다시 잡기까지 남은 시간
+        self.attack_cool = 0.0
+        self.hit_done = False           # 이번 휘두르기에서 이미 맞혔는지
 
     def pick_wander_goal(self):
         """처음 자리 주변의 걸을 수 있는 곳 하나 (몇 번 해 보고 못 찾으면 제자리)"""
@@ -44,16 +46,58 @@ class Grunt(Enemy):
         """보이면 곧장, 건물에 막히면 길찾기로 돌아서 쫓아감"""
         tg = self.target
         self.last_seen = (tg.x, tg.y)
+        if self.in_reach():                   # 칼이 닿는 거리면 더 다가가지 않고 마주 봄
+            self.moving = False
+            self.facing = 'right' if tg.x >= self.x else 'left'
+            return
         direct = Body.collision is None or Body.collision.line_clear(self.x, self.y + 10, tg.x, tg.y + 10)
-        if direct:
-            self.path = []
-            self.step_toward(tg.x, tg.y, dt)
-        else:
+        if self.path:                         # 돌아가는 길을 따라가는 중
             self.replan -= dt
-            if self.replan <= 0 or not self.path:
+            if self.replan <= 0:
+                if direct:
+                    self.path = []            # 다시 곧장 가 봄
+                else:
+                    self.go_to(tg.x, tg.y)
+                    self.replan = 0.5
+            if self.path:
+                self.follow_path(dt)
+                return
+        if direct:
+            self.step_toward(tg.x, tg.y, dt)
+            if not self.moving:               # 보이는데 몸이 걸려 못 가면 길찾기로
                 self.go_to(tg.x, tg.y)
                 self.replan = 0.5
+        else:
+            self.go_to(tg.x, tg.y)
+            self.replan = 0.5
             self.follow_path(dt)
+
+    def in_reach(self):
+        tg = self.target
+        return abs(tg.x - self.x) < GRUNT_REACH and abs(tg.y - self.y) < 26
+
+    def start_attack(self):
+        self.facing = 'right' if self.target.x >= self.x else 'left'
+        self.set_state('attack')
+        self.hit_done = False
+        self.moving = False
+
+    def attack(self, dt):
+        """칼 휘두르기: 칼이 앞으로 나가는 장면에 닿아 있으면 맞음"""
+        sheet = self.sprites['attack']
+        frame = sheet.frame_at(self.t * GRUNT_ATTACK_SPEED)
+        if not self.hit_done and frame >= GRUNT_HIT_FRAME:
+            self.hit_done = True
+            if self.in_reach():
+                self.target.take_hit(GRUNT_DAMAGE)
+        if sheet.finished(self.t * GRUNT_ATTACK_SPEED):
+            self.attack_cool = GRUNT_ATTACK_COOL
+            self.set_state('chase')
+
+    @property
+    def winding_up(self):
+        """칼을 들어 올리는 중 (적 경보등 UI 가 알려 주는 순간)"""
+        return self.state == 'attack' and not self.hit_done
 
     def search(self, dt):
         """놓치면 마지막으로 본 곳까지 가 본 뒤 다시 돌아다님 (PRD 2.5)"""
@@ -71,11 +115,28 @@ class Grunt(Enemy):
         sees = self.target is not None and self.can_see(self.target)
         if sees and self.state in ('wander', 'search'):
             self.set_state('chase')
-        elif not sees and self.state == 'chase':
+        elif not sees and self.state == 'chase' and not self.in_reach():
             self.set_state('search')
+        self.attack_cool = max(0.0, self.attack_cool - dt)
+        if self.state == 'attack':
+            self.attack(dt)
+            return
+        if self.state == 'chase' and self.attack_cool <= 0 and self.in_reach():
+            self.start_attack()
+            return
         if self.state == 'wander':
             self.wander(dt)
         elif self.state == 'chase':
             self.chase(dt)
         elif self.state == 'search':
             self.search(dt)
+
+    def sheet(self):
+        if self.state == 'attack':
+            return self.sprites['attack'], self.facing == 'left'
+        return super().sheet()
+
+    def frame(self, sheet):
+        if self.state == 'attack':
+            return sheet.frame_at(self.t * GRUNT_ATTACK_SPEED)
+        return super().frame(sheet)

@@ -102,5 +102,7 @@ class Enemy(Body):
         sx, sy = camera.to_screen(self.x, self.y)
         shadow.draw(sx, sy + 2, 46 * camera.Z)
         sheet, flip = self.sheet()
-        frame = sheet.frame_at(self.t) if self.moving else 0     # 서 있을 때는 걷기 첫 장면
-        sheet.draw(frame, sx, sy, CHAR_SCALE * camera.Z, flip)
+        sheet.draw(self.frame(sheet), sx, sy, CHAR_SCALE * camera.Z, flip)
+
+    def frame(self, sheet):
+        return sheet.frame_at(self.t) if self.moving else 0     # 서 있을 때는 걷기 첫 장면

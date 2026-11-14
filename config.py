@@ -31,3 +31,10 @@ HIT_SLOW_MUL = 0.5         # 맞으면 잠시 느려짐
 HIT_SLOW_TIME = 1.5
 VIEW_DIST = 380            # 시야 거리 (월드 px)
 VIEW_ANGLE = 120           # 시야 각도 (도)
+
+# 갱단원 근접 공격
+GRUNT_DAMAGE = 12
+GRUNT_REACH = 58           # 이 거리 안(가로)에 들어오면 칼을 휘두름
+GRUNT_ATTACK_SPEED = 2.0   # 공격 동작 재생 배속
+GRUNT_HIT_FRAME = 21       # 칼이 앞으로 나가는 장면 (이때 맞음)
+GRUNT_ATTACK_COOL = 0.6    # 한 번 휘두른 뒤 쉬는 시간
