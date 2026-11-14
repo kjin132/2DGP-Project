@@ -222,8 +222,10 @@ def clear_bonus():
 
 
 def end_stage(kind, lines):
-    """클리어·게임 오버: 결과 화면을 위에 띄움"""
+    """클리어·게임 오버: 결과 화면을 위에 띄움 (점수·처치·최대 콤보·되찾은 UI)"""
     import result_mode
+    lines = lines + [f'처치 {score.kills}   최대 콤보 {score.max_combo}   되찾은 UI {score.recovered}',
+                     f'최종 점수 {score.value:,}']
     result_mode.info = {'kind': kind, 'lines': lines}
     game_framework.push_mode(result_mode)
 
