@@ -2,6 +2,7 @@ from pico2d import *
 import game_framework
 import game_world
 from player import Player
+from body import Body
 from background import Background
 from collision import CollisionMap
 from overlay import OverlaySet
@@ -45,13 +46,13 @@ def init():
     collision = CollisionMap(stage1.FOLDER)
     overlays = OverlaySet(stage1.FOLDER)
     game_world.extra_sources.append(overlays.visible)    # 건물 윗부분이 캐릭터를 가리게
-    Player.collision = Bullet.collision = collision
+    Body.collision = Bullet.collision = collision
     items = [ITEM_CLASSES[k](x, y) for k, x, y in stage1.build_items()]
     game_world.add_objects(items, 1)
     Player.items = items
     pedestals = [UIPedestal(x, y) for x, y in stage1.build_pedestals()]
     game_world.add_objects(pedestals, 1)
-    Player.pedestals = pedestals
+    Body.pedestals = pedestals
     Bullet.obstacles = pedestals
     player = Player(*stage1.PLAYER_START)
     game_world.add_object(player, 1)

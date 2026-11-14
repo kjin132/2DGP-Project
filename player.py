@@ -6,6 +6,7 @@ import camera
 import sheriff_sprites
 import shadow
 from bullet import Bullet
+from body import Body
 from config import (CHAR_SCALE, PLAYER_SPEED, DASH_TIME, DASH_SPEED, DASH_COOLDOWN,
                     MAX_AMMO, RELOAD_TIME, FIRE_INTERVAL, PICK_RANGE, MAX_HP)
 
@@ -14,11 +15,8 @@ GUN_REACH = 38         # 몸 중심에서 총구까지 가로 거리
 
 MOVE_KEYS = {SDLK_w: (0, 1), SDLK_s: (0, -1), SDLK_a: (-1, 0), SDLK_d: (1, 0)}
 
-BODY_HALF_W = 17       # 몸통 너비의 절반 (월드 px)
-BODY_BOX_H = 22        # 충돌 상자 높이 (발끝 ~ 무릎)
 
-
-class Player:
+class Player(Body):
     def __init__(self, x, y):
         self.x, self.y = x, y
         self.sprites = sheriff_sprites.load()
@@ -54,7 +52,6 @@ class Player:
 
     # ---------- UI 줍기 / 내려놓기 ----------
     items = []          # 맵의 UI 목록, play_mode 가 채워 줌
-    pedestals = []      # 거치대 목록
 
     def nearest(self, objs, cond):
         best, bd = None, PICK_RANGE
@@ -71,10 +68,10 @@ class Player:
         item = self.nearest(Player.items, lambda o: o.owner == 'floor')
         if item:
             return 'pickup', item
-        ped = self.nearest(Player.pedestals, lambda p: p.item is not None)
+        ped = self.nearest(Body.pedestals, lambda p: p.item is not None)
         if ped:
             return 'take', ped
-        ped = self.nearest(Player.pedestals, lambda p: p.item is None)
+        ped = self.nearest(Body.pedestals, lambda p: p.item is None)
         if ped and self.hands[self.selected]:
             return 'install', ped
         if self.hands[self.selected]:
@@ -224,34 +221,6 @@ class Player:
         if self.facing == 'down':
             return 'front', False
         return 'side', self.facing == 'left'
-
-    collision = None    # 맵 충돌 격자, play_mode 가 채워 줌
-
-    def body_bb(self, x=None, y=None):
-        """충돌 상자: 좌우는 몸통 양끝, 아래는 발끝, 위는 무릎 높이.
-        오른쪽으로 가다 부딪히면 몸 오른쪽 끝, 왼쪽은 왼쪽 끝, 아래는 발끝이 닿는 순간 멈춘다.
-        위쪽을 머리까지 잡으면 건물 사이 길(약 72px)을 키(약 77px)가 못 지나가서 무릎 높이까지만."""
-        x = self.x if x is None else x
-        y = self.y if y is None else y
-        return x - BODY_HALF_W, y, x + BODY_HALF_W, y + BODY_BOX_H
-
-    def blocked(self, x, y):
-        from collision import overlaps
-        bb = self.body_bb(x, y)
-        if Player.collision and Player.collision.blocks_walk(*bb):
-            return True
-        return any(overlaps(bb, p.get_bb()) for p in Player.pedestals)
-
-    def try_move(self, dx, dy):
-        """x, y 를 따로 움직여 보고 막히면 그 축만 취소 (벽을 따라 미끄러지듯)"""
-        if dx and not self.blocked(self.x + dx, self.y):
-            self.x += dx
-        if dy and not self.blocked(self.x, self.y + dy):
-            self.y += dy
-
-    def clamp_to_map(self):
-        self.x = min(max(self.x, 20), camera.map_w - 20)
-        self.y = min(max(self.y, 10), camera.map_h - 60)
 
     def draw(self):
         sx, sy = camera.to_screen(self.x, self.y)
