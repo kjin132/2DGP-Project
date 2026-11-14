@@ -234,6 +234,8 @@ class Player(Body):
         return 'side', self.facing == 'left'
 
     def draw(self):
+        if self.hurt_t > 0 and int(self.hurt_t * 16) % 2:    # 맞은 직후 깜빡임
+            return
         sx, sy = camera.to_screen(self.x, self.y)
         shadow.draw(sx, sy + 2, 46 * camera.Z)
         scale = CHAR_SCALE * camera.Z
