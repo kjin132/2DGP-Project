@@ -61,7 +61,7 @@ class Player(Body):
 
     # ---------- UI 줍기 / 내려놓기 ----------
     items = []          # 맵의 UI 목록, play_mode 가 채워 줌
-    on_claim = None     # UI 가 처음 손에 들어올 때 부를 함수, play_mode 가 채워 줌
+    on_receive = None   # UI 가 손에 들어올 때마다 부를 함수, play_mode 가 채워 줌
 
     def nearest(self, objs, cond):
         best, bd = None, PICK_RANGE
@@ -129,13 +129,11 @@ class Player(Body):
         self.receive(item, slot)
 
     def receive(self, item, slot):
-        """UI 를 손 슬롯에 넣음. 처음 손에 들어온 UI 면 on_claim 으로 알려 줌 (적 UI 획득 점수 등)"""
+        """UI 를 손 슬롯에 넣고 on_receive 로 알려 줌 (적 UI 획득·도난 UI 회수 점수 등)"""
         item.owner = 'player'
         self.hands[slot] = item
-        if not item.claimed:
-            item.claimed = True
-            if Player.on_claim:
-                Player.on_claim(item)
+        if Player.on_receive:
+            Player.on_receive(item)
 
     def eat(self):
         """선택한 슬롯의 UI 먹기 (F): 내 UI 는 체력 회복, 적 UI·가짜 UI 는 체력 감소. 먹은 UI 는 사라짐"""

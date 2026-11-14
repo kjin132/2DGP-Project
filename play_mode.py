@@ -85,7 +85,7 @@ def init():
     Enemy.target = player
     Enemy.drop_pool = [k for k, c in ITEM_CLASSES.items() if c.is_enemy_ui]
     Enemy.on_drop = on_enemy_ui_drop
-    Player.on_claim = on_claim
+    Player.on_receive = on_receive
     Enemy.show_hp = lambda: 'enemy_hp' in hud.active_kinds()
     Enemy.show_alarm = lambda: 'enemy_alarm' in hud.active_kinds()
     Thief.exit_gate = exit_gate
@@ -121,6 +121,13 @@ def on_enemy_ui_drop(kind, x, y):
     items.append(item)
     game_world.add_object(item, 1)
     hud.alert(f'{item.name} 떨어짐!', (150, 220, 255), 2.5)
+
+
+def on_receive(item):
+    """UI 가 보안관 손에 들어올 때마다"""
+    if not item.claimed:
+        item.claimed = True
+        on_claim(item)
 
 
 def on_claim(item):
