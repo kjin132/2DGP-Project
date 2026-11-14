@@ -43,6 +43,10 @@ GRUNT_ATTACK_SPEED = 2.0   # 공격 동작 재생 배속
 GRUNT_HIT_FRAME = 21       # 칼이 앞으로 나가는 장면 (이때 맞음)
 GRUNT_ATTACK_COOL = 0.6    # 한 번 휘두른 뒤 쉬는 시간
 
+# 무법자 도둑
+THIEF_STEAL_SPEED = 1.6    # 훔치는 동작 재생 배속 (약 0.6초)
+THIEF_FLEE_MUL = 1.15      # 훔친 뒤 도망갈 때는 더 빠름
+
 # UI 던지기 (Q)
 THROW_SPEED = 650
 THROW_RANGE = 420          # 이만큼 날아가면 떨어져 부서짐
