@@ -25,6 +25,7 @@ class Enemy(Body):
         self.path = []                # 길찾기로 잡은 지점 목록
         self.path_goal = None
         self.slow_t = 0.0             # 0 보다 크면 맞아서 느려진 상태
+        self.flash_t = 0.0            # 맞은 순간 잠깐 반투명하게
 
     # ---------- 이동 ----------
     def speed(self):
@@ -97,6 +98,7 @@ class Enemy(Body):
             return
         self.hp -= damage
         self.slow_t = HIT_SLOW_TIME           # 맞으면 1.5초 동안 절반 속도 (PRD 2.5)
+        self.flash_t = 0.12
 
     def set_state(self, s):
         if s != self.state:
@@ -107,6 +109,7 @@ class Enemy(Body):
         dt = game_framework.frame_time
         self.t += dt
         self.slow_t = max(0.0, self.slow_t - dt)
+        self.flash_t = max(0.0, self.flash_t - dt)
 
     # ---------- 그리기 ----------
     def sheet(self):
@@ -121,7 +124,11 @@ class Enemy(Body):
         sx, sy = camera.to_screen(self.x, self.y)
         shadow.draw(sx, sy + 2, 46 * camera.Z)
         sheet, flip = self.sheet()
+        if self.flash_t > 0:
+            sheet.image.opacify(0.45)
         sheet.draw(self.frame(sheet), sx, sy, CHAR_SCALE * camera.Z, flip)
+        if self.flash_t > 0:
+            sheet.image.opacify(1.0)
 
     def frame(self, sheet):
         return sheet.frame_at(self.t) if self.moving else 0     # 서 있을 때는 걷기 첫 장면
