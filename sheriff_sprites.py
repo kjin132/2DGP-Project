@@ -8,14 +8,14 @@ _SPECS = {
     'walk_side':  ('walk_side.png', 189, 273, 24, 24, (106, 271), True),
     'walk_front': ('walk_front.png', 162, 266, 14, 28, (86, 263), True),
     'walk_back':  ('walk_back.png', 174, 273, 16, 32, (83, 265), True),
-    'dash':       ('dash.png', 310, 274, 10, 20, (105, 271), True),
+    'dash':       ('run_side.png', 196, 268, 8, 16, (137, 259), True),     # 대시는 달리기 그림
     'shoot':      ('shoot.png', 308, 262, 8, 31, (95, 259), False),
     'pickup':     ('pickup.png', 215, 262, 10, 20, (73, 259), False),
 }
 
 # 옆모습: 대기 그림은 걷기보다 자세가 낮게(모자 챙 높이 221 vs 228) 그려져 있어서 3% 키워서 맞춤.
 # 발 위치 x 는 머리와 발 가운데가 같은 자리에 오도록 잡음 (서 있다 걸을 때 몸이 옆으로 튀지 않게)
-_SIZE = {'idle_side': 1.03}
+_SIZE = {'idle_side': 1.03, 'dash': 1.03}     # 달리기 그림도 몸을 숙여 그려져 있어 같은 비율로 키움
 
 _cache = None
 
