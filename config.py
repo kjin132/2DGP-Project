@@ -16,6 +16,7 @@ BULLET_SIZE = (8, 16)      # 화면에 그릴 총알 크기
 MAX_AMMO = 9
 RELOAD_TIME = 1.2
 FIRE_INTERVAL = 0.25
+BULLET_DAMAGE = 10
 
 # UI 오브젝트
 ITEM_WORLD_SIZE = 64       # 바닥에 놓인 UI 의 긴 변 길이 (px)

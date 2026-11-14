@@ -3,13 +3,14 @@ from pico2d import load_image
 import game_framework
 import game_world
 import camera
-from config import BULLET_SPEED, BULLET_LIFE, BULLET_SIZE
+from config import BULLET_SPEED, BULLET_LIFE, BULLET_SIZE, BULLET_DAMAGE
 
 
 class Bullet:
     image = None
     collision = None    # 맵 충돌 격자
     obstacles = []      # 거치대처럼 따로 놓인 물체, play_mode 가 채워 줌
+    targets = []        # 맞을 수 있는 적 목록
 
     def __init__(self, x, y, angle):
         if Bullet.image is None:
@@ -34,6 +35,12 @@ class Bullet:
         hit_map = Bullet.collision and Bullet.collision.blocks_bullet(self.x, self.y - self.height)
         if self.life <= 0 or hit_map or any(o.blocks_point(self.x, self.y) for o in Bullet.obstacles):
             game_world.remove_object(self)
+            return
+        for e in Bullet.targets:
+            if e.alive and e.hit_by_point(self.x, self.y):
+                e.take_hit(BULLET_DAMAGE)
+                game_world.remove_object(self)
+                return
 
     def draw(self):
         # 그림이 위(+90도)를 보고 있으므로 90도 빼서 날아가는 방향을 보게 함

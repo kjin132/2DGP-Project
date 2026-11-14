@@ -81,6 +81,20 @@ class Enemy(Body):
             self.path.pop(0)
         return not self.path
 
+    # ---------- 피격 ----------
+    @property
+    def alive(self):
+        return self.hp > 0
+
+    def hit_by_point(self, px, py):
+        """화면에 그려진 몸(발에서 머리까지) 안에 점이 들어오면 맞음"""
+        return abs(px - self.x) < 20 and self.y - 4 <= py <= self.y + 80
+
+    def take_hit(self, damage):
+        if not self.alive:
+            return
+        self.hp -= damage
+
     def set_state(self, s):
         if s != self.state:
             self.state = s

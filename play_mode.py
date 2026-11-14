@@ -61,6 +61,7 @@ def init():
     Bullet.obstacles = pedestals
     enemies = [Grunt(x, y) for x, y in stage1.build_grunts()]
     game_world.add_objects(enemies, 1)
+    Bullet.targets = enemies
     player = Player(*stage1.PLAYER_START)
     game_world.add_object(player, 1)
     Enemy.target = player
