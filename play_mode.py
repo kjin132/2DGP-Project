@@ -87,12 +87,27 @@ def update():
     camera.follow(player.x, player.y + 40)
     player.set_aim(*camera.to_world(*mouse_screen))
     hud.mouse = mouse_screen   # 카메라가 움직여도 조준점이 마우스를 따라가게
+    if exit_gate.reached(player):
+        end_stage('clear', [f'{exit_gate.name} 출구로 빠져나왔다'])
+    elif player.hp <= 0:
+        end_stage('gameover', ['보안관이 쓰러졌다'])
+
+
+def draw_world():
+    game_world.render()
 
 
 def draw():
     clear_canvas()
-    game_world.render()
+    draw_world()
     update_canvas()
+
+
+def end_stage(kind, lines):
+    """클리어·게임 오버: 결과 화면을 위에 띄움"""
+    import result_mode
+    result_mode.info = {'kind': kind, 'lines': lines}
+    game_framework.push_mode(result_mode)
 
 
 def pause():
@@ -100,4 +115,4 @@ def pause():
 
 
 def resume():
-    pass
+    hide_cursor()
