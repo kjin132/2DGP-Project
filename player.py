@@ -260,7 +260,8 @@ class Player:
         suffix, flip = self.view()
         if self.state == 'dash':                     # 대시는 옆모습 한 종류
             sheet, flip = self.sprites['dash'], self.facing == 'left'
-            sheet.draw(sheet.frame_at(self.t * 2), sx, sy, scale, flip)
+            speed = sheet.duration / DASH_TIME          # 대시 한 번에 달리기 한 바퀴가 딱 돌도록
+            sheet.draw(sheet.frame_at(self.t * speed), sx, sy, scale, flip)
             return
         if self.state == 'pickup':                   # 줍기는 옆모습, 1.6배속
             sheet = self.sprites['pickup']
