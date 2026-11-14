@@ -12,6 +12,8 @@ class Grunt(Enemy):
     max_hp = 40
     points = 100
     WANDER_RANGE = 350          # 처음 자리에서 이만큼 안에서 돌아다님
+    COVER_RANGE = 650           # 도둑이 달아날 때 이 거리 안의 갱단원이 보안관 앞을 막음
+    COVER_GAP = 70              # 보안관에게서 도둑 쪽으로 이만큼 떨어진 곳에 섬
 
     def __init__(self, x, y):
         super().__init__(x, y)
@@ -74,6 +76,36 @@ class Grunt(Enemy):
             self.go_to(tg.x, tg.y)
             self.replan = 0.5
             self.follow_path(dt)
+
+    @staticmethod
+    def fleeing_thief():
+        for e in Enemy.group:
+            if e.who == 'thief' and e.state == 'flee':
+                return e
+        return None
+
+    def cover(self, dt, thief):
+        """도둑을 엄호: 보안관과 도둑 사이, 보안관 바로 앞을 막아섬 (PRD 2.10 도주)"""
+        tg = self.target
+        dx, dy = thief.x - tg.x, thief.y - tg.y
+        d = math.hypot(dx, dy) or 1
+        gx, gy = tg.x + dx / d * self.COVER_GAP, tg.y + dy / d * self.COVER_GAP
+        if self.blocked(gx, gy):
+            gx, gy = tg.x, tg.y
+        if math.hypot(gx - self.x, gy - self.y) < 12:
+            self.moving = False
+            self.face_toward(tg.x - self.x, tg.y - self.y)
+            return
+        if Body.collision is None or Body.collision.line_clear(self.x, self.y + 10, gx, gy + 10):
+            self.path = []
+            self.step_toward(gx, gy, dt)
+            if self.moving:
+                return
+        self.replan -= dt
+        if not self.path or self.replan <= 0:
+            self.go_to(gx, gy)
+            self.replan = 0.4
+        self.follow_path(dt)
 
     def spot_floor_ui(self):
         """보이는 곳에 떨어진 내 UI 가 있으면 그것 (모든 적은 바닥 UI 를 주움, PRD 2.11)"""
@@ -154,8 +186,17 @@ class Grunt(Enemy):
         if self.state == 'attack':
             self.attack(dt)
             return
-        if self.state == 'chase' and self.attack_cool <= 0 and self.in_reach():
+        thief = self.fleeing_thief() if self.target is not None else None
+        near = thief is not None and math.hypot(self.target.x - self.x, self.target.y - self.y) < self.COVER_RANGE
+        if near and self.state in ('wander', 'search', 'chase', 'fetch'):
+            self.set_state('cover')
+        elif not near and self.state == 'cover':
+            self.set_state('chase' if sees else 'wander')
+        if self.state in ('chase', 'cover') and self.attack_cool <= 0 and self.in_reach():
             self.start_attack()
+            return
+        if self.state == 'cover':
+            self.cover(dt, thief)
             return
         if self.state in ('wander', 'search'):
             it = self.spot_floor_ui()
