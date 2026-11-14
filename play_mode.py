@@ -69,6 +69,7 @@ def init():
     Player.items = UIItem.all = items
     score = Score(items)
     Enemy.score = score
+    score.chasing = lambda: any(t.state == 'flee' for t in Enemy.group if t.who == 'thief')
     pedestals = [UIPedestal(x, y) for x, y in stage1.build_pedestals()]
     game_world.add_objects(pedestals, 1)
     Body.pedestals = pedestals

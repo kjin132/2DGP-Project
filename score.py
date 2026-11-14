@@ -5,6 +5,7 @@ import game_world
 from effects import FloatText
 
 COMBO_WINDOW = 3.0          # 이 시간 안에 다음 적을 쓰러뜨리면 콤보가 이어짐
+CHASE_COMBO_WINDOW = 5.0    # 도둑을 쫓는 중에는 콤보 유지 시간이 늘어남 (PRD 2.10 추격 보상)
 COMBO_STEPS = ((10, 2.5), (6, 2.0), (3, 1.5), (1, 1.0))
 BLIND_MULT = {4: 1.0, 3: 1.2, 2: 1.4, 1: 1.6, 0: 2.0}
 BLIND_KINDS = ('hp', 'minimap', 'crosshair', 'ammo')     # 점수판을 뺀 플레이어 UI 4종
@@ -17,6 +18,8 @@ class Score:
         self.combo = 0
         self.combo_t = 0.0
         self.max_combo = 0
+        self.clock = 0.0            # 스테이지 시작부터 흐른 시간
+        self.chasing = lambda: False   # 도둑이 UI 를 들고 달아나는 중인지, play_mode 가 채워 줌
 
     # ---------- 켜진 UI ----------
     def board_active(self):
@@ -48,11 +51,11 @@ class Score:
         self.value += gained
         return gained
 
-    def kill(self, base, x, y, window=COMBO_WINDOW):
+    def kill(self, base, x, y):
         """적 처치: 콤보를 잇고 점수를 더함. 얻은 점수를 그 자리에 띄움"""
         self.combo = self.combo + 1 if self.combo_t > 0 else 1
         self.max_combo = max(self.max_combo, self.combo)
-        self.combo_t = window
+        self.combo_t = CHASE_COMBO_WINDOW if self.chasing() else COMBO_WINDOW
         gained = self.add(base)
         if gained:
             self.popup(x, y, f'+{gained}')
@@ -63,6 +66,7 @@ class Score:
         self.value = max(0, self.value - amount)
 
     def update(self):
+        self.clock += game_framework.frame_time
         if self.combo_t > 0:
             self.combo_t -= game_framework.frame_time
             if self.combo_t <= 0:
