@@ -84,6 +84,7 @@ def init():
     Enemy.target = player
     Enemy.drop_pool = [k for k, c in ITEM_CLASSES.items() if c.is_enemy_ui]
     Enemy.on_drop = on_enemy_ui_drop
+    Player.on_claim = on_claim
     Thief.exit_gate = exit_gate
     Thief.on_steal = on_thief_steal
     Thief.on_escape = on_thief_escape
@@ -115,6 +116,15 @@ def on_enemy_ui_drop(kind, x, y):
     items.append(item)
     game_world.add_object(item, 1)
     hud.alert(f'{item.name} 떨어짐!', (150, 220, 255), 2.5)
+
+
+def on_claim(item):
+    """적 UI 를 처음 손에 넣으면 +500 (PRD 2.9 적 UI 획득)"""
+    if item.is_enemy_ui:
+        gained = score.add(500)
+        if gained:
+            score.popup(player.x, player.y + 20, f'+{gained}', (150, 220, 255))
+        hud.alert(f'{eul(item.name)} 손에 넣었다!', (150, 220, 255), 2.5)
 
 
 def on_thief_appear(thief):

@@ -30,6 +30,7 @@ class UIItem:
         self.owner = 'floor'
         self.is_fake = False
         self.durability = 100
+        self.claimed = False   # 한 번이라도 보안관 손에 들어왔는지 (적 UI 첫 획득 점수용)
         self.t = 0.0
         self.image = _image(self.icon)
         self.glow = _image(self.icon + '_glow')
