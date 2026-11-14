@@ -3,6 +3,7 @@
 import math
 import random
 import game_world
+from effects import TrailSpark
 from body import Body
 from enemy import Enemy
 from config import THIEF_STEAL_SPEED, THIEF_FLEE_MUL
@@ -17,12 +18,15 @@ class Thief(Enemy):
     exit_gate = None            # 도망갈 출구 (play_mode 가 채워 줌)
     on_escape = None            # 도둑이 UI 를 들고 나갔을 때 부를 함수
     on_steal = None             # 훔쳤을 때 부를 함수
+    leave_trail = None          # 빛 조각 흔적을 남길지 (미니맵이 없을 때만), play_mode 가 채워 줌
+    TRAIL_GAP = 0.12
 
     def __init__(self, x, y):
         super().__init__(x, y)
         self.state = 'approach'
         self.mark = None            # 노리는 거치대 (없으면 보안관)
         self.replan = 0.0
+        self.trail_t = 0.0
 
     # ---------- 노릴 곳 ----------
     def pick_mark(self):
@@ -103,6 +107,10 @@ class Thief(Enemy):
         if not self.path:
             self.go_to(g.x, g.y)
         self.follow_path(dt)
+        self.trail_t -= dt
+        if self.trail_t <= 0 and self.carried is not None and Thief.leave_trail and Thief.leave_trail():
+            self.trail_t = self.TRAIL_GAP
+            game_world.add_object(TrailSpark(self.carried.glow, self.x, self.y), 1)
 
     def escape(self):
         item, self.carried = self.carried, None

@@ -85,6 +85,7 @@ def init():
     Thief.exit_gate = exit_gate
     Thief.on_steal = on_thief_steal
     Thief.on_escape = on_thief_escape
+    Thief.leave_trail = lambda: 'minimap' not in hud.active_kinds()
     thieves = ThiefDirector(player, stage1.THIEF_SPAWNS)
     thieves.on_appear = on_thief_appear
     game_world.add_object(thieves, 0)

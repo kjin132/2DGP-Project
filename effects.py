@@ -78,3 +78,33 @@ class FloatText:
     def draw(self):
         sx, sy = camera.to_screen(self.x, self.y + 90 + 30 * self.t)
         FloatText.font.draw(sx - len(self.text) * 6, sy, self.text, self.color)
+
+
+class TrailSpark:
+    """도둑이 들고 가는 UI 에서 떨어지는 빛 조각: 바닥에 남아 몇 초 동안 반짝이다 사라짐 (PRD 2.10 추격)"""
+    LIFE = 5.0
+
+    def __init__(self, image, x, y):
+        self.image = image
+        self.x, self.y = x + random.uniform(-8, 8), y + random.uniform(-6, 6)
+        self.t = 0.0
+        self.phase = random.uniform(0, math.tau)
+        self.size = random.uniform(9, 14)
+
+    @property
+    def sort_y(self):
+        return self.y + 100          # 바닥에 깔림
+
+    def update(self):
+        self.t += game_framework.frame_time
+        if self.t >= self.LIFE:
+            game_world.remove_object(self)
+
+    def draw(self):
+        sx, sy = camera.to_screen(self.x, self.y)
+        fade = 1 - self.t / self.LIFE
+        twinkle = 0.6 + 0.4 * math.sin(self.t * 9 + self.phase)
+        self.image.opacify(max(0.0, fade * twinkle))
+        s = self.size * camera.Z
+        self.image.draw(sx, sy, s, s)
+        self.image.opacify(1.0)
