@@ -29,6 +29,7 @@ class Enemy(Body):
         self.path_goal = None
         self.slow_t = 0.0             # 0 보다 크면 맞아서 느려진 상태
         self.flash_t = 0.0            # 맞은 순간 잠깐 반투명하게
+        self.carried = None           # 주운(또는 훔친) 내 UI — 머리 위에 들고 다님
 
     # ---------- 이동 ----------
     def speed(self):
@@ -106,7 +107,20 @@ class Enemy(Body):
         self.slow_t = HIT_SLOW_TIME           # 맞으면 1.5초 동안 절반 속도 (PRD 2.5)
         self.flash_t = 0.12
 
+    def carry(self, item):
+        item.owner = 'enemy'
+        self.carried = item
+
+    def drop_carried(self):
+        """가진 UI 를 발밑에 떨어뜨림 (내 UI 를 가진 적은 쓰러지면 반드시 떨어뜨림, PRD 2.5)"""
+        item, self.carried = self.carried, None
+        if item is not None:
+            item.owner = 'floor'
+            item.x, item.y = self.x, self.y - 6
+        return item
+
     def die(self):
+        self.drop_carried()
         self.hp = 0
         self.set_state('dead')
         self.moving = False
@@ -162,6 +176,8 @@ class Enemy(Body):
         sheet.draw(self.frame(sheet), sx, sy, CHAR_SCALE * camera.Z, flip)
         if self.flash_t > 0 or fade < 1:
             sheet.image.opacify(1.0)
+        if self.carried is not None:              # 들고 있는 UI 를 머리 위에 (누가 가져갔는지 보이게)
+            self.carried.draw_at(sx, sy + 84 * camera.Z)
 
     def frame(self, sheet):
         if self.state == 'dead':
