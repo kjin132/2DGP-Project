@@ -8,7 +8,8 @@ import shadow
 from bullet import Bullet
 from body import Body
 from config import (CHAR_SCALE, PLAYER_SPEED, DASH_TIME, DASH_SPEED, DASH_COOLDOWN,
-                    MAX_AMMO, RELOAD_TIME, FIRE_INTERVAL, PICK_RANGE, MAX_HP, HURT_INVINCIBLE)
+                    MAX_AMMO, RELOAD_TIME, FIRE_INTERVAL, PICK_RANGE, MAX_HP, HURT_INVINCIBLE,
+                    WEIGHT_SPEED)
 
 GUN_HEIGHT = 56        # 발에서 총구까지 높이 (화면 px)
 GUN_REACH = 38         # 몸 중심에서 총구까지 가로 거리
@@ -173,6 +174,11 @@ class Player(Body):
         self.set_state('dash')
         self.invincible = True
 
+    def speed(self):
+        """UI 를 많이 들수록 느려짐 (무게 패널티)"""
+        n = sum(1 for h in self.hands if h is not None)
+        return PLAYER_SPEED * WEIGHT_SPEED[n]
+
     def move_dir(self):
         dx = sum(MOVE_KEYS[k][0] for k in self.held)
         dy = sum(MOVE_KEYS[k][1] for k in self.held)
@@ -214,7 +220,8 @@ class Player(Body):
             return
         if dx or dy:
             n = math.hypot(dx, dy)
-            self.try_move(dx / n * PLAYER_SPEED * dt, dy / n * PLAYER_SPEED * dt)
+            v = self.speed()
+            self.try_move(dx / n * v * dt, dy / n * v * dt)
             self.clamp_to_map()
             if dx:
                 self.facing = 'right' if dx > 0 else 'left'

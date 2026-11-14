@@ -21,6 +21,7 @@ BULLET_DAMAGE = 10
 # UI 오브젝트
 ITEM_WORLD_SIZE = 64       # 바닥에 놓인 UI 의 긴 변 길이 (px)
 PICK_RANGE = 70            # E 키가 닿는 거리
+WEIGHT_SPEED = (1.0, 0.9, 0.75)   # 들고 있는 UI 0/1/2개일 때 이동 속도 배율 (PRD 2.2)
 
 # 플레이어 체력
 MAX_HP = 100
