@@ -145,6 +145,7 @@ def on_recover(item):
         text += f'  +{gained}'
         score.popup(player.x, player.y + 20, f'+{gained}', (140, 255, 160))
     hud.alert(text, (140, 255, 160), 3.0)
+    hud.turn_on(item.kind)
     if by_trail:
         hud.alert('흔적만으로 찾아냈다!', (255, 230, 140), 3.0)
 

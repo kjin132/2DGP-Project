@@ -36,6 +36,7 @@ class HUD:
         self.alerts = []                    # 화면 가운데 위에 잠깐 뜨는 알림 [글자, 색, 남은 시간]
         self.arrow = _img('arrow')
         self.danger = _img('danger_edge')
+        self.revive = {}                    # 되찾아서 다시 켜지는 UI: 종류 → 남은 깜빡임 시간
         self.pointers = []                  # 화면 밖 대상을 가리키는 화살표 [대상, 남은 시간]
 
     def active_kinds(self):
@@ -49,9 +50,17 @@ class HUD:
         for a in self.alerts:
             a[2] -= game_framework.frame_time
         self.alerts = [a for a in self.alerts if a[2] > 0]
+        for k in list(self.revive):
+            self.revive[k] -= game_framework.frame_time
+            if self.revive[k] <= 0:
+                del self.revive[k]
         for p in self.pointers:
             p[1] -= game_framework.frame_time
         self.pointers = [p for p in self.pointers if p[1] > 0 and p[0].alive]
+
+    def turn_on(self, kind, time=1.0):
+        """되찾은 UI 가 HUD 에 다시 켜지는 연출 (잠깐 깜빡이며 켜짐)"""
+        self.revive[kind] = time
 
     def point_at(self, target, time=4.0):
         self.pointers.append([target, time])
@@ -219,7 +228,7 @@ class HUD:
         self.draw_alerts()
         self.draw_slots()
         self.draw_prompt()
-        kinds = self.active_kinds()
+        kinds = {k for k in self.active_kinds() if not (k in self.revive and int(self.revive[k] * 8) % 2)}
         if 'hp' in kinds:
             self.draw_hp()
         if 'minimap' in kinds:
