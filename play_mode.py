@@ -194,7 +194,7 @@ def update():
     hud.mouse = mouse_screen   # 카메라가 움직여도 조준점이 마우스를 따라가게
     if exit_gate.reached(player):
         bonus = clear_bonus()
-        end_stage('clear', [f'{exit_gate.name} 출구로 빠져나왔다', f'끝까지 지킨 UI 보너스 +{bonus}'])
+        end_stage('clear', [f'{exit_gate.name} 출구로 빠져나왔다', f'끝까지 지킨 UI 보너스 +{bonus:,}'])
     elif player.hp <= 0:
         end_stage('gameover', ['보안관이 쓰러졌다'])
 
