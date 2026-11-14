@@ -3,7 +3,7 @@ from pico2d import load_image, load_font
 import math
 import game_framework
 import camera
-from config import SCREEN_W, SCREEN_H, MAX_HP
+from config import SCREEN_W, SCREEN_H, MAX_HP, DANGER_HP
 
 
 def _img(name):
@@ -35,6 +35,7 @@ class HUD:
         self.slot = _img('slot')
         self.alerts = []                    # 화면 가운데 위에 잠깐 뜨는 알림 [글자, 색, 남은 시간]
         self.arrow = _img('arrow')
+        self.danger = _img('danger_edge')
         self.pointers = []                  # 화면 밖 대상을 가리키는 화살표 [대상, 남은 시간]
 
     def active_kinds(self):
@@ -201,7 +202,19 @@ class HUD:
             text += f' ({target.name})'
         self.font.draw(sx - len(text) * 6, sy + 110 * camera.Z, text, (255, 240, 200))
 
+    def draw_danger(self):
+        """HP 바가 없을 때 위험 상태면 화면 가장자리만 붉게 두근거림 (PRD 2.3)"""
+        hp = self.player.hp
+        if hp <= 0 or hp > DANGER_HP:
+            return
+        beat = 0.5 + 0.5 * abs(math.sin(self.t * (3 + 3 * (1 - hp / DANGER_HP))))   # 낮을수록 빨리 뜀
+        self.danger.opacify(0.45 + 0.55 * beat)
+        self.danger.draw(SCREEN_W / 2, SCREEN_H / 2, SCREEN_W, SCREEN_H)
+        self.danger.opacify(1.0)
+
     def draw(self):
+        if 'hp' not in self.active_kinds():
+            self.draw_danger()
         self.draw_pointers()
         self.draw_alerts()
         self.draw_slots()
