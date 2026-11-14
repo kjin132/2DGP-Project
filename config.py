@@ -23,3 +23,10 @@ PICK_RANGE = 70            # E 키가 닿는 거리
 
 # 플레이어 체력
 MAX_HP = 100
+
+# 적 공통 (PRD 2.5)
+ENEMY_SPEED_MUL = 1.2      # 적은 보안관 기본 속도보다 빠름
+HIT_SLOW_MUL = 0.5         # 맞으면 잠시 느려짐
+HIT_SLOW_TIME = 1.5
+VIEW_DIST = 380            # 시야 거리 (월드 px)
+VIEW_ANGLE = 120           # 시야 각도 (도)
