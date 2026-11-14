@@ -5,12 +5,13 @@ import camera
 import shadow
 import enemy_sprites
 from body import Body
-from config import CHAR_SCALE, PLAYER_SPEED, ENEMY_SPEED_MUL
+from config import CHAR_SCALE, PLAYER_SPEED, ENEMY_SPEED_MUL, VIEW_DIST, VIEW_ANGLE
 
 
 class Enemy(Body):
     who = None              # 스프라이트 묶음 이름 ('thief' / 'grunt')
     max_hp = 30
+    target = None           # 쫓을 대상(보안관), play_mode 가 채워 줌
 
     def __init__(self, x, y):
         self.x, self.y = x, y
@@ -44,6 +45,22 @@ class Enemy(Body):
         self.face_toward(dx, dy)
         self.moving = self.try_move(dx / d * v, dy / d * v)
         return False
+
+    # ---------- 시야 ----------
+    FACING_DIR = {'right': (1, 0), 'left': (-1, 0), 'up': (0, 1), 'down': (0, -1)}
+
+    def can_see(self, who):
+        """앞쪽 시야(거리·각도) 안에 있고 건물에 가려지지 않으면 보임 (PRD 2.5 시야)"""
+        dx, dy = who.x - self.x, who.y - self.y
+        d = math.hypot(dx, dy)
+        if d > VIEW_DIST:
+            return False
+        if d > 1:
+            fx, fy = self.FACING_DIR[self.facing]
+            cos = (dx * fx + dy * fy) / d
+            if cos < math.cos(math.radians(VIEW_ANGLE / 2)):
+                return False
+        return Body.collision is None or Body.collision.line_clear(self.x, self.y + 10, who.x, who.y + 10)
 
     def set_state(self, s):
         if s != self.state:
