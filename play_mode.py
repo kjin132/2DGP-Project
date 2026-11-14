@@ -85,6 +85,7 @@ def init():
     Enemy.drop_pool = [k for k, c in ITEM_CLASSES.items() if c.is_enemy_ui]
     Enemy.on_drop = on_enemy_ui_drop
     Player.on_claim = on_claim
+    Enemy.show_hp = lambda: 'enemy_hp' in hud.active_kinds()
     Thief.exit_gate = exit_gate
     Thief.on_steal = on_thief_steal
     Thief.on_escape = on_thief_escape

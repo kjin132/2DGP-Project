@@ -7,6 +7,7 @@ import camera
 import shadow
 import enemy_sprites
 import pathfind
+from pico2d import load_image
 from body import Body
 from config import CHAR_SCALE, PLAYER_SPEED, ENEMY_SPEED_MUL, VIEW_DIST, VIEW_ANGLE, HIT_SLOW_MUL, HIT_SLOW_TIME
 from config import ENEMY_UI_DROP_CHANCE
@@ -22,6 +23,8 @@ class Enemy(Body):
     CORPSE_TIME = 1.2       # 쓰러진 뒤 사라지기까지
     drop_pool = []          # 이번 스테이지에서 아직 안 떨어진 적 UI 종류 (같은 종류는 한 번만, PRD 2.4)
     on_drop = None          # 적 UI 가 떨어질 때 부를 함수 (종류, x, y), play_mode 가 채워 줌
+    show_hp = staticmethod(lambda: False)    # 적 HP 바 UI 가 켜져 있는지, play_mode 가 채워 줌
+    hp_frame = hp_fill = None
 
     def __init__(self, x, y):
         self.x, self.y = x, y
@@ -197,8 +200,34 @@ class Enemy(Body):
         sheet.draw(self.frame(sheet), sx, sy, CHAR_SCALE * camera.Z, flip)
         if self.flash_t > 0 or fade < 1:
             sheet.image.opacify(1.0)
+        top = sy + 84 * camera.Z                  # 머리 바로 위
         if self.carried is not None:              # 들고 있는 UI 를 머리 위에 (누가 가져갔는지 보이게)
-            self.carried.draw_at(sx, sy + 84 * camera.Z, ground=False)
+            self.carried.draw_at(sx, top, ground=False)
+            top += 76 * camera.Z
+        else:
+            top = sy + 74 * camera.Z              # 모자 꼭대기
+        if self.alive and Enemy.show_hp():
+            self.draw_hp_bar(sx, top)
+
+    def draw_hp_bar(self, sx, bottom_y):
+        """적 HP 바 UI 가 켜져 있으면 머리 위에 남은 체력 (해골 틀 + 빨간 막대)"""
+        if Enemy.hp_frame is None:
+            Enemy.hp_frame = load_image('resources/ui/item_enemy_hp_frame.png')
+            Enemy.hp_fill = load_image('resources/ui/item_enemy_hp_fill.png')
+        f, g = Enemy.hp_frame, Enemy.hp_fill
+        W = 46 * camera.Z
+        s = W / f.w
+        H = f.h * s
+        cy = bottom_y + H / 2 - 30 * s           # 그림 아래 빈 여백만큼 내림
+        f.draw(sx, cy, W, H)
+        ratio = max(0.0, self.hp / self.max_hp)
+        if ratio <= 0:
+            return
+        # 틀 안의 빈 칸: 왼쪽 위 기준 x 216~604, y 118~188 / 막대 그림의 빨간 부분: x 36~328, y 54~104
+        left = sx - W / 2 + 216 * s
+        bottom = cy + H / 2 - 188 * s
+        g.clip_draw_to_origin(36, g.h - 104, int(292 * ratio), 50,
+                              left, bottom, (604 - 216) * s * ratio, (188 - 118) * s)
 
     def frame(self, sheet):
         if self.state == 'dead':
