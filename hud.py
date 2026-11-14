@@ -99,6 +99,11 @@ class HUD:
         text = f'{self.score.value:,}'
         # 숫자는 SCORE 글자 아래 (그림 위쪽 기준 y 약 640)
         self.big_font.draw(cx - len(text) * 9.3, cy + h / 2 - 640 * s, text, (60, 30, 20))
+        sc = self.score
+        info = f'블라인드 x{sc.blind_mult():.1f}'
+        if sc.combo >= 2:
+            info = f'{sc.combo} 콤보 x{sc.combo_mult():.1f}   ' + info
+        self.font.draw(cx - len(info) * 6.5, cy - h / 2 - 14, info, (255, 230, 160))
 
     def draw_crosshair(self):
         self.crosshair.draw(*self.mouse, 48, 48)
