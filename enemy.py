@@ -24,7 +24,9 @@ class Enemy(Body):
     drop_pool = []          # 이번 스테이지에서 아직 안 떨어진 적 UI 종류 (같은 종류는 한 번만, PRD 2.4)
     on_drop = None          # 적 UI 가 떨어질 때 부를 함수 (종류, x, y), play_mode 가 채워 줌
     show_hp = staticmethod(lambda: False)    # 적 HP 바 UI 가 켜져 있는지, play_mode 가 채워 줌
-    hp_frame = hp_fill = None
+    show_alarm = staticmethod(lambda: False)  # 적 경보등 UI 가 켜져 있는지, play_mode 가 채워 줌
+    hp_frame = hp_fill = alarm = None
+    winding_up = False      # 공격을 준비하는 중인지 (갱단원이 정함)
 
     def __init__(self, x, y):
         self.x, self.y = x, y
@@ -207,7 +209,17 @@ class Enemy(Body):
         else:
             top = sy + 74 * camera.Z              # 모자 꼭대기
         if self.alive and Enemy.show_hp():
-            self.draw_hp_bar(sx, top)
+            top = self.draw_hp_bar(sx, top)
+        if self.alive and self.winding_up and Enemy.show_alarm():
+            self.draw_alarm(sx, top)
+
+    def draw_alarm(self, sx, bottom_y):
+        """적 경보등 UI: 공격을 준비하는 적 머리 위에서 경보등이 커졌다 작아지며 번쩍임"""
+        if Enemy.alarm is None:
+            Enemy.alarm = load_image('resources/ui/item_enemy_alarm.png')
+        pulse = 1 + 0.15 * math.sin(self.t * 30)
+        size = 30 * camera.Z * pulse
+        Enemy.alarm.draw(sx, bottom_y + 17 * camera.Z, size, size)
 
     def draw_hp_bar(self, sx, bottom_y):
         """적 HP 바 UI 가 켜져 있으면 머리 위에 남은 체력 (해골 틀 + 빨간 막대)"""
@@ -222,12 +234,13 @@ class Enemy(Body):
         f.draw(sx, cy, W, H)
         ratio = max(0.0, self.hp / self.max_hp)
         if ratio <= 0:
-            return
+            return cy + H / 2
         # 틀 안의 빈 칸: 왼쪽 위 기준 x 216~604, y 118~188 / 막대 그림의 빨간 부분: x 36~328, y 54~104
         left = sx - W / 2 + 216 * s
         bottom = cy + H / 2 - 188 * s
         g.clip_draw_to_origin(36, g.h - 104, int(292 * ratio), 50,
                               left, bottom, (604 - 216) * s * ratio, (188 - 118) * s)
+        return cy + H / 2 - 30 * s                # 막대 위쪽 (그 위에 경보등을 올림)
 
     def frame(self, sheet):
         if self.state == 'dead':
