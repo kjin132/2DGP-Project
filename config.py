@@ -17,6 +17,7 @@ MAX_AMMO = 9
 RELOAD_TIME = 1.2
 FIRE_INTERVAL = 0.25
 BULLET_DAMAGE = 10
+ENEMY_UI_DROP_CHANCE = 0.05   # 적이 맞을 때마다 적 UI 를 떨어뜨릴 확률 (PRD 2.4)
 
 # UI 오브젝트
 ITEM_WORLD_SIZE = 64       # 바닥에 놓인 UI 의 긴 변 길이 (px)

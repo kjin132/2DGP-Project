@@ -1,5 +1,6 @@
 """적 공통: 맵 위를 걷고, 맞으면 느려지고, 쓰러지면 가진 UI 를 떨어뜨린다 (PRD 2.5)"""
 import math
+import random
 import game_framework
 import game_world
 import camera
@@ -8,6 +9,7 @@ import enemy_sprites
 import pathfind
 from body import Body
 from config import CHAR_SCALE, PLAYER_SPEED, ENEMY_SPEED_MUL, VIEW_DIST, VIEW_ANGLE, HIT_SLOW_MUL, HIT_SLOW_TIME
+from config import ENEMY_UI_DROP_CHANCE
 
 
 class Enemy(Body):
@@ -18,6 +20,8 @@ class Enemy(Body):
     score = None            # 점수 (play_mode 가 채워 줌)
     points = 100            # 쓰러뜨리면 받는 기본 점수
     CORPSE_TIME = 1.2       # 쓰러진 뒤 사라지기까지
+    drop_pool = []          # 이번 스테이지에서 아직 안 떨어진 적 UI 종류 (같은 종류는 한 번만, PRD 2.4)
+    on_drop = None          # 적 UI 가 떨어질 때 부를 함수 (종류, x, y), play_mode 가 채워 줌
 
     def __init__(self, x, y):
         self.x, self.y = x, y
@@ -107,12 +111,20 @@ class Enemy(Body):
     def take_hit(self, damage):
         if not self.alive:
             return
+        self.roll_enemy_ui()
         self.hp -= damage
         if self.hp <= 0:
             self.die()
             return
         self.slow_t = HIT_SLOW_TIME           # 맞으면 1.5초 동안 절반 속도 (PRD 2.5)
         self.flash_t = 0.12
+
+    def roll_enemy_ui(self):
+        """맞을 때마다 5% 확률로 아직 안 나온 적 UI 하나를 옆 바닥에 떨어뜨림"""
+        if Enemy.drop_pool and random.random() < ENEMY_UI_DROP_CHANCE:
+            kind = Enemy.drop_pool.pop(random.randrange(len(Enemy.drop_pool)))
+            if Enemy.on_drop:
+                Enemy.on_drop(kind, self.x, self.y)
 
     def carry(self, item):
         item.owner = 'enemy'

@@ -82,6 +82,8 @@ def init():
     player = Player(*stage1.PLAYER_START)
     game_world.add_object(player, 1)
     Enemy.target = player
+    Enemy.drop_pool = [k for k, c in ITEM_CLASSES.items() if c.is_enemy_ui]
+    Enemy.on_drop = on_enemy_ui_drop
     Thief.exit_gate = exit_gate
     Thief.on_steal = on_thief_steal
     Thief.on_escape = on_thief_escape
@@ -101,6 +103,18 @@ def eul(word):
     if '가' <= ch <= '힣':
         return word + ('을' if (ord(ch) - 0xAC00) % 28 else '를')
     return word + '를'
+
+
+def on_enemy_ui_drop(kind, x, y):
+    """맞은 적 옆 바닥에 적 UI 가 떨어짐 (몸에 가리지 않게 조금 옆, 막힌 곳이면 발밑)"""
+    item = ITEM_CLASSES[kind](x, y - 4)
+    for dx in (36, -36):
+        if not player.blocked(x + dx, y - 4):
+            item.x = x + dx
+            break
+    items.append(item)
+    game_world.add_object(item, 1)
+    hud.alert(f'{item.name} 떨어짐!', (150, 220, 255), 2.5)
 
 
 def on_thief_appear(thief):
