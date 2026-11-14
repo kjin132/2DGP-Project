@@ -27,7 +27,9 @@ class HUD:
         self.ammo_frame = _img('item_ammo_frame')
         self.bullet = load_image('resources/effect/bullet.png')
         self.score_frame = _img('item_score_frame')
-        self.dots = {k: _img('mm_' + k) for k in ('player', 'item', 'pedestal')}
+        self.dots = {k: _img('mm_' + k) for k in ('player', 'item', 'pedestal', 'enemy', 'thief', 'exit')}
+        self.enemies = []            # 살아 있는 적 (play_mode 가 채워 줌)
+        self.exit_gate = None        # 이번 판의 출구 (play_mode 가 채워 줌)
         self.score = None            # 점수 (play_mode 가 채워 줌)
         self.slot = _img('slot')
         self.alerts = []                    # 화면 가운데 위에 잠깐 뜨는 알림 [글자, 색, 남은 시간]
@@ -116,6 +118,9 @@ class HUD:
         for i in self.items:
             if i.owner == 'floor':
                 self.dots['item'].draw(mx(i.x), my(i.y), 8, 8)
+        for e in self.enemies:                  # 적 위치 (PRD 2.3 미니맵: 적 위치)
+            if e.who != 'thief':
+                self.dots['enemy'].draw(mx(e.x), my(e.y), 7, 7)
         self.dots['player'].draw(mx(self.player.x), my(self.player.y), 10, 10)
 
     def draw_ammo(self):

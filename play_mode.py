@@ -96,6 +96,8 @@ def init():
     game_world.add_object(thieves, 0)
     hud = HUD(player, items, pedestals, f'{stage1.FOLDER}/minimap.png', background.pixel_w, background.pixel_h)
     hud.score = score
+    hud.enemies = Enemy.group
+    hud.exit_gate = exit_gate
     game_world.add_object(hud, 2)
     hide_cursor()      # 마우스 커서 대신 조준선 UI 가 있어야 조준점이 보임
 
