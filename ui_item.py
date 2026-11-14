@@ -93,4 +93,17 @@ class ScoreBoardItem(UIItem):
     kind, name, icon = 'score', '점수판', 'item_score_frame'
 
 
-ITEM_CLASSES = {c.kind: c for c in (HPBarItem, MinimapItem, CrosshairItem, AmmoGaugeItem, ScoreBoardItem)}
+class EnemyHPItem(UIItem):
+    """적 HP 바: 켜 두면 모든 적 머리 위에 남은 체력이 보임 (PRD 2.6)"""
+    kind, name, icon = 'enemy_hp', '적 HP 바', 'item_enemy_hp_frame'
+    is_enemy_ui = True
+
+
+class EnemyAlarmItem(UIItem):
+    """적 경보등: 켜 두면 갱단원이 칼을 들어 올릴 때 머리 위에 경보가 뜸 (PRD 2.6)"""
+    kind, name, icon = 'enemy_alarm', '적 경보등', 'item_enemy_alarm'
+    is_enemy_ui = True
+
+
+ITEM_CLASSES = {c.kind: c for c in (HPBarItem, MinimapItem, CrosshairItem, AmmoGaugeItem, ScoreBoardItem,
+                                    EnemyHPItem, EnemyAlarmItem)}
