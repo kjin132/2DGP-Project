@@ -1,4 +1,5 @@
 import math
+import random
 from pico2d import *
 import game_framework
 import game_world
@@ -10,7 +11,7 @@ from thrown_ui import ThrownUI
 from body import Body
 from config import (CHAR_SCALE, PLAYER_SPEED, DASH_TIME, DASH_SPEED, DASH_COOLDOWN,
                     MAX_AMMO, RELOAD_TIME, FIRE_INTERVAL, PICK_RANGE, MAX_HP, HURT_INVINCIBLE,
-                    WEIGHT_SPEED, EAT_AMOUNT)
+                    WEIGHT_SPEED, EAT_AMOUNT, HURT_DROP_CHANCE)
 
 GUN_HEIGHT = 56        # 발에서 총구까지 높이 (화면 px)
 GUN_REACH = 38         # 몸 중심에서 총구까지 가로 거리
@@ -190,6 +191,12 @@ class Player(Body):
             return False
         self.hp = max(0, self.hp - damage)
         self.hurt_t = HURT_INVINCIBLE
+        held = [i for i, h in enumerate(self.hands) if h is not None]
+        if held and random.random() < HURT_DROP_CHANCE:      # 맞으면 가끔 UI 를 놓침
+            i = random.choice(held)
+            ox = random.choice((-1, 1)) * random.uniform(30, 50)
+            self.put_down(self.hands[i], self.x + ox, self.y + random.uniform(-15, 15))
+            self.hands[i] = None
         return True
 
     def start_dash(self):
