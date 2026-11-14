@@ -6,7 +6,7 @@ import shadow
 import enemy_sprites
 import pathfind
 from body import Body
-from config import CHAR_SCALE, PLAYER_SPEED, ENEMY_SPEED_MUL, VIEW_DIST, VIEW_ANGLE
+from config import CHAR_SCALE, PLAYER_SPEED, ENEMY_SPEED_MUL, VIEW_DIST, VIEW_ANGLE, HIT_SLOW_MUL, HIT_SLOW_TIME
 
 
 class Enemy(Body):
@@ -24,10 +24,12 @@ class Enemy(Body):
         self.moving = False
         self.path = []                # 길찾기로 잡은 지점 목록
         self.path_goal = None
+        self.slow_t = 0.0             # 0 보다 크면 맞아서 느려진 상태
 
     # ---------- 이동 ----------
     def speed(self):
-        return PLAYER_SPEED * ENEMY_SPEED_MUL
+        v = PLAYER_SPEED * ENEMY_SPEED_MUL
+        return v * HIT_SLOW_MUL if self.slow_t > 0 else v
 
     def face_toward(self, dx, dy):
         if abs(dx) >= abs(dy):
@@ -94,6 +96,7 @@ class Enemy(Body):
         if not self.alive:
             return
         self.hp -= damage
+        self.slow_t = HIT_SLOW_TIME           # 맞으면 1.5초 동안 절반 속도 (PRD 2.5)
 
     def set_state(self, s):
         if s != self.state:
@@ -101,7 +104,9 @@ class Enemy(Body):
             self.t = 0.0
 
     def update(self):
-        self.t += game_framework.frame_time
+        dt = game_framework.frame_time
+        self.t += dt
+        self.slow_t = max(0.0, self.slow_t - dt)
 
     # ---------- 그리기 ----------
     def sheet(self):
