@@ -93,6 +93,14 @@ def init():
     hide_cursor()      # 마우스 커서 대신 조준선 UI 가 있어야 조준점이 보임
 
 
+def eul(word):
+    """'을/를' 고르기: 마지막 글자에 받침이 있으면 '을'"""
+    ch = word[-1]
+    if '가' <= ch <= '힣':
+        return word + ('을' if (ord(ch) - 0xAC00) % 28 else '를')
+    return word + '를'
+
+
 def on_thief_steal(thief, item):
     hud.alert(f'{item.name} 도난!')
 
@@ -101,7 +109,7 @@ def on_thief_escape(thief, item):
     """도둑이 UI 를 들고 나가면 그 UI 는 이 스테이지에서 잃고 500점 깎임 (점수판이 없어도)"""
     score.penalty(500)
     name = item.name if item else 'UI'
-    hud.alert(f'도둑이 {name}를 가지고 달아났다!  -500', (255, 120, 90), 3.5)
+    hud.alert(f'도둑이 {eul(name)} 가지고 달아났다!  -500', (255, 120, 90), 3.5)
 
 
 def finish():
