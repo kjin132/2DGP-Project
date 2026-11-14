@@ -57,7 +57,8 @@ def draw():
         center_text(big, SCREEN_H / 2 + 120, 'GAME OVER', (230, 70, 60), 64)
     y = SCREEN_H / 2 + 30
     for line in info.get('lines', []):
-        center_text(font, y, line, (255, 240, 210), 26)
+        color = (255, 215, 100) if line.startswith('최종 점수') else (255, 240, 210)   # 최종 점수는 금색
+        center_text(font, y, line, color, 26)
         y -= 40
     center_text(font, 80, 'Enter: 다시 하기   ESC: 끝내기', (200, 190, 170), 26)
     update_canvas()
