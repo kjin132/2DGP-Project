@@ -72,6 +72,8 @@ def init():
     pedestals = [UIPedestal(x, y) for x, y in stage1.build_pedestals()]
     game_world.add_objects(pedestals, 1)
     Body.pedestals = pedestals
+    for ped in pedestals:
+        pathfind.nav.block_rect(*ped.get_bb())
     Bullet.obstacles = pedestals
     enemies = [Grunt(x, y) for x, y in stage1.build_grunts()]
     game_world.add_objects(enemies, 1)

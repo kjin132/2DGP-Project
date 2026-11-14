@@ -35,6 +35,15 @@ class NavGrid:
                 if all(pref[y][r] - pref[y][l] == 0 for y in range(cy, cy + hh)):
                     self.ok[ny * self.w + nx] = 1
 
+    def block_rect(self, l, b, r, t):
+        """맵 그림에 없는 장애물(거치대)도 길찾기에서 피하게 칸을 막음 (몸 너비만큼 넓혀서)"""
+        l -= BODY_HALF_W
+        r += BODY_HALF_W
+        b -= BODY_BOX_H
+        for ny in range(max(0, int(b // N)), min(self.h, int(t // N) + 1)):
+            for nx in range(max(0, int(l // N)), min(self.w, int(r // N) + 1)):
+                self.ok[ny * self.w + nx] = 0
+
     def walkable(self, nx, ny):
         return 0 <= nx < self.w and 0 <= ny < self.h and self.ok[ny * self.w + nx]
 
