@@ -8,7 +8,7 @@ import shadow
 from bullet import Bullet
 from body import Body
 from config import (CHAR_SCALE, PLAYER_SPEED, DASH_TIME, DASH_SPEED, DASH_COOLDOWN,
-                    MAX_AMMO, RELOAD_TIME, FIRE_INTERVAL, PICK_RANGE, MAX_HP)
+                    MAX_AMMO, RELOAD_TIME, FIRE_INTERVAL, PICK_RANGE, MAX_HP, HURT_INVINCIBLE)
 
 GUN_HEIGHT = 56        # 발에서 총구까지 높이 (화면 px)
 GUN_REACH = 38         # 몸 중심에서 총구까지 가로 거리
@@ -34,6 +34,7 @@ class Player(Body):
         self.hp = MAX_HP
         self.hands = [None, None]                 # 손 슬롯 2칸
         self.selected = 0                         # 1/2 키로 고른 슬롯
+        self.hurt_t = 0.0                         # 0 보다 크면 맞은 직후 무적
 
     # ---------- 입력 ----------
     def handle_event(self, e):
@@ -150,6 +151,15 @@ class Player(Body):
         if self.ammo == 0:
             self.start_reload()
 
+    # ---------- 피격 ----------
+    def take_hit(self, damage):
+        """적에게 맞음. 대시 중이나 맞은 직후에는 무시. 실제로 맞았으면 True"""
+        if self.invincible or self.hurt_t > 0 or self.hp <= 0:
+            return False
+        self.hp = max(0, self.hp - damage)
+        self.hurt_t = HURT_INVINCIBLE
+        return True
+
     def start_dash(self):
         if self.state == 'dash' or self.dash_cool > 0:
             return
@@ -178,6 +188,7 @@ class Player(Body):
         dt = game_framework.frame_time
         self.t += dt
         self.dash_cool = max(0.0, self.dash_cool - dt)
+        self.hurt_t = max(0.0, self.hurt_t - dt)
         self.fire_cool = max(0.0, self.fire_cool - dt)
         if self.reload_t > 0:
             self.reload_t -= dt

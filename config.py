@@ -23,6 +23,7 @@ PICK_RANGE = 70            # E 키가 닿는 거리
 
 # 플레이어 체력
 MAX_HP = 100
+HURT_INVINCIBLE = 0.8      # 맞은 뒤 잠깐 무적 (연속으로 맞지 않게)
 
 # 적 공통 (PRD 2.5)
 ENEMY_SPEED_MUL = 1.2      # 적은 보안관 기본 속도보다 빠름
