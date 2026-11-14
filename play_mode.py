@@ -17,6 +17,8 @@ import pathfind
 import random
 from exit_gate import ExitGate
 from score import Score
+from thief import Thief
+from thief_director import ThiefDirector
 import stage1
 import camera
 from config import SCREEN_H
@@ -29,6 +31,7 @@ hud = None
 enemies = []
 exit_gate = None
 score = None
+thieves = None
 mouse_screen = (0, 0)     # 마우스 화면 좌표 (pico2d 기준, 아래가 0)
 
 
@@ -50,7 +53,7 @@ def handle_events():
 
 
 def init():
-    global player, background, items, pedestals, hud, enemies, exit_gate, score
+    global player, background, items, pedestals, hud, enemies, exit_gate, score, thieves
     background = Background(stage1.FOLDER)
     game_world.add_object(background, 0)
     camera.set_bounds(background.pixel_w, background.pixel_h)
@@ -77,6 +80,9 @@ def init():
     player = Player(*stage1.PLAYER_START)
     game_world.add_object(player, 1)
     Enemy.target = player
+    Thief.exit_gate = exit_gate
+    thieves = ThiefDirector(player, stage1.THIEF_SPAWNS)
+    game_world.add_object(thieves, 0)
     hud = HUD(player, items, pedestals, f'{stage1.FOLDER}/minimap.png', background.pixel_w, background.pixel_h)
     hud.score = score
     game_world.add_object(hud, 2)

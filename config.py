@@ -46,6 +46,9 @@ GRUNT_ATTACK_COOL = 0.6    # 한 번 휘두른 뒤 쉬는 시간
 # 무법자 도둑
 THIEF_STEAL_SPEED = 1.6    # 훔치는 동작 재생 배속 (약 0.6초)
 THIEF_FLEE_MUL = 1.15      # 훔친 뒤 도망갈 때는 더 빠름
+THIEF_FIRST_DELAY = 40     # 스테이지 시작 뒤 첫 도둑이 나타나기까지 (초)
+THIEF_INTERVAL = 50        # 도둑이 사라진 뒤 다음 도둑까지
+THIEF_SPAWN_MIN_DIST = 700 # 보안관과 이만큼은 떨어진 곳에서 나타남
 
 # UI 던지기 (Q)
 THROW_SPEED = 650
