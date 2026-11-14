@@ -36,6 +36,7 @@ def handle_events():
             game_framework.quit()
         elif event.type == SDL_MOUSEMOTION:
             mouse_screen = (event.x, SCREEN_H - 1 - event.y)
+            player.set_aim(*camera.to_world(*mouse_screen))    # 같은 프레임에 누른 Q·클릭도 새 위치로
         elif event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
             player.set_aim(*camera.to_world(event.x, SCREEN_H - 1 - event.y))
             player.fire()
