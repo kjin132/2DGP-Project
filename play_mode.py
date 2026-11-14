@@ -133,16 +133,20 @@ def on_receive(item):
 
 
 def on_recover(item):
-    """도둑에게 빼앗긴 UI 를 되찾음: +300, 5초 안에 되찾으면 +200 더 (PRD 2.10 추격 보상)"""
+    """도둑에게 빼앗긴 UI 를 되찾음 (PRD 2.10 추격 보상)
+    +300, 5초 안에 되찾으면 +200, 미니맵 없이 흔적만으로 되찾으면 +300"""
     fast = score.clock - item.stolen_at <= 5.0
+    by_trail = not item.seen_on_map          # 미니맵 없이 빛 흔적만 따라가 되찾음
     item.stolen_at = None
-    base = 300 + (200 if fast else 0)
+    base = 300 + (200 if fast else 0) + (300 if by_trail else 0)
     gained = score.add(base)
     text = f'{item.name} {"빠른 " if fast else ""}회수!'
     if gained:
         text += f'  +{gained}'
         score.popup(player.x, player.y + 20, f'+{gained}', (140, 255, 160))
     hud.alert(text, (140, 255, 160), 3.0)
+    if by_trail:
+        hud.alert('흔적만으로 찾아냈다!', (255, 230, 140), 3.0)
 
 
 def on_claim(item):
@@ -161,6 +165,7 @@ def on_thief_appear(thief):
 
 def on_thief_steal(thief, item):
     item.stolen_at = score.clock
+    item.seen_on_map = False
     hud.alert(f'{item.name} 도난!')
 
 
@@ -178,6 +183,10 @@ def finish():
 def update():
     game_world.update()
     score.update()
+    if 'minimap' in hud.active_kinds():
+        for i in items:
+            if i.stolen_at is not None:
+                i.seen_on_map = True
     camera.follow(player.x, player.y + 40)
     player.set_aim(*camera.to_world(*mouse_screen))
     hud.mouse = mouse_screen   # 카메라가 움직여도 조준점이 마우스를 따라가게
