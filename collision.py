@@ -67,6 +67,17 @@ class CollisionMap:
     def blocks_bullet(self, x, y):
         return self.at(x, y) == SOLID
 
+    def line_clear(self, x0, y0, x1, y1):
+        """두 점 사이에 건물·울타리·절벽이 없으면 True (물은 시야를 가리지 않음).
+        한 칸(4px)씩 따라가며 검사한다."""
+        d = max(abs(x1 - x0), abs(y1 - y0))
+        n = max(1, int(d // self.cell))
+        for i in range(1, n):
+            t = i / n
+            if self.at(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t) == SOLID:
+                return False
+        return True
+
 
 def overlaps(a, b):
     """두 사각형 (left, bottom, right, top) 이 겹치는지"""
