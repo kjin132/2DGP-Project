@@ -10,7 +10,7 @@ import pathfind
 from pico2d import load_image
 from body import Body
 from config import CHAR_SCALE, PLAYER_SPEED, ENEMY_SPEED_MUL, VIEW_DIST, VIEW_ANGLE, HIT_SLOW_MUL, HIT_SLOW_TIME
-from config import ENEMY_UI_DROP_CHANCE
+from config import ENEMY_UI_DROP_CHANCE, SENSE_DIST
 
 
 class Enemy(Body):
@@ -72,12 +72,13 @@ class Enemy(Body):
     FACING_DIR = {'right': (1, 0), 'left': (-1, 0), 'up': (0, 1), 'down': (0, -1)}
 
     def can_see(self, who):
-        """앞쪽 시야(거리·각도) 안에 있고 건물에 가려지지 않으면 보임 (PRD 2.5 시야)"""
+        """앞쪽 시야(거리·각도) 안에 있고 건물에 가려지지 않으면 보임 (PRD 2.5 시야).
+        아주 가까우면(SENSE_DIST) 어느 방향에 있든 알아챔"""
         dx, dy = who.x - self.x, who.y - self.y
         d = math.hypot(dx, dy)
         if d > VIEW_DIST:
             return False
-        if d > 1:
+        if d > SENSE_DIST:
             fx, fy = self.FACING_DIR[self.facing]
             cos = (dx * fx + dy * fy) / d
             if cos < math.cos(math.radians(VIEW_ANGLE / 2)):
