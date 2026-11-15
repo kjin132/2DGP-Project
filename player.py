@@ -18,6 +18,11 @@ GUN_REACH = 38         # 몸 중심에서 총구까지 가로 거리
 
 MOVE_KEYS = {SDLK_w: (0, 1), SDLK_s: (0, -1), SDLK_a: (-1, 0), SDLK_d: (1, 0)}
 
+# 제자리에서 하는 동작과 재생 배속. 이 동작들이 끝날 때까지는 걸을 수 없음 (모두 옆모습 그림)
+ACTIONS = {'pickup': 1.6, 'shoot': 2.0, 'eat': 2.4, 'throw': 2.2}
+EAT_FRAME = 24         # 먹기: 손이 입에 닿는 장면 (이때 UI 가 사라지고 체력이 바뀜)
+THROW_FRAME = 12       # 던지기: 팔을 앞으로 뻗어 손에서 놓는 장면 (이때 UI 가 날아감)
+
 
 class Player(Body):
     def __init__(self, x, y):
@@ -39,6 +44,7 @@ class Player(Body):
         self.selected = 0                         # 1/2 키로 고른 슬롯
         self.hurt_t = 0.0                         # 0 보다 크면 맞은 직후 무적
         self.walk_t = 0.0                         # 걷기 동작이 돈 횟수 (움직인 거리에 비례)
+        self.using = None                         # 먹거나 던지려고 손에 쥔 UI (동작 중간에 실제로 쓰임)
 
     # ---------- 입력 ----------
     def handle_event(self, e):
@@ -88,8 +94,12 @@ class Player(Body):
             return 'drop', None
         return None, None
 
+    def busy(self):
+        """대시나 줍기·먹기·던지기 동작 중 (다른 손동작을 시작할 수 없음)"""
+        return self.state in ('dash', 'pickup', 'eat', 'throw')
+
     def interact(self):
-        if self.state in ('dash', 'pickup'):
+        if self.busy():
             return
         action, target = self.interaction_target()
         if action == 'pickup':
@@ -136,29 +146,46 @@ class Player(Body):
             Player.on_receive(item)
 
     def eat(self):
-        """선택한 슬롯의 UI 먹기 (F): 내 UI 는 체력 회복, 적 UI·가짜 UI 는 체력 감소. 먹은 UI 는 사라짐"""
+        """선택한 슬롯의 UI 먹기 (F): 먹는 동작을 시작하고, 손이 입에 닿는 순간 실제로 먹음"""
         item = self.hands[self.selected]
-        if item is None or self.state in ('dash', 'pickup'):
+        if item is None or self.busy():
+            return
+        self.using = item
+        if self.facing in ('up', 'down'):
+            self.facing = 'right' if self.aim_x >= self.x else 'left'
+        self.set_state('eat')
+
+    def swallow(self):
+        """내 UI 는 체력 회복, 적 UI·가짜 UI 는 체력 감소. 먹은 UI 는 사라짐.
+        (먹는 도중 맞아서 UI 를 떨어뜨렸으면 아무 일도 없음)"""
+        item, self.using = self.using, None
+        if item is None or item not in self.hands:
             return
         if item.is_fake or item.is_enemy_ui:
             self.hp = max(0, self.hp - EAT_AMOUNT)
         else:
             self.hp = min(MAX_HP, self.hp + EAT_AMOUNT)
-        self.hands[self.selected] = None
+        self.hands[self.hands.index(item)] = None
         item.destroy()
-        self.set_state('pickup')
 
     def throw(self):
-        """선택한 슬롯의 UI 를 마우스 쪽으로 던짐 (Q). 던진 UI 는 이 스테이지에서 사라짐"""
+        """선택한 슬롯의 UI 를 마우스 쪽으로 던짐 (Q): 던지는 동작을 시작하고, 팔을 뻗는 순간 날아감"""
         item = self.hands[self.selected]
-        if item is None or self.state in ('dash', 'pickup'):
+        if item is None or self.busy():
             return
-        self.hands[self.selected] = None
-        item.destroy()
+        self.using = item
         self.facing = 'right' if self.aim_x >= self.x else 'left'
-        game_world.add_object(ThrownUI(item, self.x, self.y, self.aim_x, self.aim_y - GUN_HEIGHT), 1)
-        if self.state in ('idle', 'shoot'):          # 서서 던지면 팔을 뻗는 사격 동작으로
-            self.state, self.t = 'shoot', 0.0
+        self.set_state('throw')
+
+    def release(self):
+        """손에서 놓는 순간: 그때 마우스가 가리키는 곳으로 날아감. 던진 UI 는 이 스테이지에서 사라짐"""
+        item, self.using = self.using, None
+        if item is None or item not in self.hands:
+            return
+        self.hands[self.hands.index(item)] = None
+        item.destroy()
+        hand = self.x + (36 if self.facing == 'right' else -36)       # 뻗은 손 위치에서 출발
+        game_world.add_object(ThrownUI(item, hand, self.y, self.aim_x, self.aim_y - GUN_HEIGHT), 1)
 
     def put_down(self, item, x, y):
         if self.blocked(x, y):            # 벽·건물 안이면 발밑에 놓음
@@ -174,7 +201,7 @@ class Player(Body):
             self.reload_t = RELOAD_TIME
 
     def fire(self):
-        if self.state == 'dash' or self.reload_t > 0 or self.fire_cool > 0:
+        if self.busy() or self.reload_t > 0 or self.fire_cool > 0:
             return
         if self.ammo <= 0:
             self.start_reload()
@@ -234,6 +261,8 @@ class Player(Body):
         if s != self.state:
             self.state = s
             self.t = 0.0
+            if s not in ('eat', 'throw'):
+                self.using = None             # 대시로 끊으면 먹기·던지기는 없던 일
 
     # ---------- 갱신 ----------
     def update(self):
@@ -255,15 +284,17 @@ class Player(Body):
                 self.dash_cool = DASH_COOLDOWN
                 self.set_state('idle')
             return
+        if self.state in ACTIONS:                    # 줍기·사격·먹기·던지기 동안은 제자리
+            sheet, t = self.sprites[self.state], self.t * ACTIONS[self.state]
+            if self.using is not None:
+                if self.state == 'eat' and sheet.frame_at(t) >= EAT_FRAME:
+                    self.swallow()
+                elif self.state == 'throw' and sheet.frame_at(t) >= THROW_FRAME:
+                    self.release()
+            if not sheet.finished(t):
+                return
+            self.set_state('idle')                   # 동작이 끝난 프레임부터 바로 다시 걸을 수 있음
         dx, dy = self.move_dir()
-        if self.state == 'pickup':                   # 줍는 동안은 멈춤
-            if self.sprites['pickup'].finished(self.t * 1.6):
-                self.set_state('idle')
-            return
-        if self.state == 'shoot' and not (dx or dy):
-            if self.sprites['shoot'].finished(self.t * 2):
-                self.set_state('idle')
-            return
         if dx or dy:
             n = math.hypot(dx, dy)
             v = self.speed()
@@ -299,13 +330,9 @@ class Player(Body):
             speed = sheet.duration / DASH_TIME          # 대시 한 번에 달리기 한 바퀴가 딱 돌도록
             sheet.draw(sheet.frame_at(self.t * speed), sx, sy, scale, flip)
             return
-        if self.state == 'pickup':                   # 줍기는 옆모습, 1.6배속
-            sheet = self.sprites['pickup']
-            sheet.draw(sheet.frame_at(self.t * 1.6), sx, sy, scale, self.facing == 'left')
-            return
-        if self.state == 'shoot':                    # 사격은 옆모습, 2배속
-            sheet = self.sprites['shoot']
-            sheet.draw(sheet.frame_at(self.t * 2), sx, sy, scale, self.facing == 'left')
+        if self.state in ACTIONS:                    # 줍기·사격·먹기·던지기는 옆모습
+            sheet = self.sprites[self.state]
+            sheet.draw(sheet.frame_at(self.t * ACTIONS[self.state]), sx, sy, scale, self.facing == 'left')
             return
         sheet = self.sprites[f'{self.state}_{suffix}']
         if self.state == 'walk':     # 시트마다 장 수가 달라도(24·28·32장) 한 바퀴 도는 시간은 같게
