@@ -10,6 +10,8 @@ _SPECS = {
     'walk_back':  ('walk_back.png', 174, 273, 16, 32, (83, 265), True),
     'dash':       ('run_side.png', 196, 268, 8, 16, (137, 259), True),     # 대시는 달리기 그림
     'shoot':      ('shoot.png', 308, 262, 8, 31, (90, 259), False),
+    'shoot_front': ('shoot_front.png', 180, 260, 8, 26, (93, 258), False),   # 시트 22번 장면부터 (총을 겨눈 자세)
+    'shoot_back':  ('shoot_back.png', 214, 258, 8, 32, (72, 256), False),    # 시트 18번 장면부터
     'pickup':     ('pickup.png', 215, 262, 10, 20, (85, 259), False),
     'eat':        ('eat.png', 168, 264, 8, 73, (85, 262), False),
     'throw':      ('throw.png', 226, 262, 8, 47, (96, 261), False),
@@ -22,7 +24,10 @@ _SPECS = {
 # 줍기도 대기와 같은 자세로 시작하므로 같은 3%
 # 달리기 그림은 머리(모자 챙 너비 106px)가 다른 동작(113px)보다 작게 그려져 있어 7% 키움
 # 뒤 대기 그림은 키가 4px 작게 그려져 있어 2% 키움 (모자 높이가 뒤 걷기와 같아짐)
-_SIZE = {'idle_back': 1.02, 'idle_side': 1.03, 'dash': 1.07, 'shoot': 1.05, 'pickup': 1.03, 'eat': 1.03, 'throw': 1.03, 'death': 1.29}
+# 앞·뒤 사격 그림은 총을 들어 올리는 앞부분이 길어서(옆 사격의 3배) 겨눈 자세부터 재생:
+# 그러면 총구 불꽃이 옆 사격과 같은 9장 뒤에 나오고 동작 길이도 비슷해짐
+_FIRST = {'shoot_front': 22, 'shoot_back': 18}
+_SIZE = {'shoot_back': 1.02, 'idle_back': 1.02, 'idle_side': 1.03, 'dash': 1.07, 'shoot': 1.05, 'pickup': 1.03, 'eat': 1.03, 'throw': 1.03, 'death': 1.29}
 
 # 옆 걷기 그림은 장면마다 몸 전체가 좌우로 최대 9px 씩 튀어서(머리 위치 기준) 걸을 때 뚝뚝 끊겨 보임.
 # 그림은 그대로 두고, 머리가 늘 같은 자리에 오도록 프레임마다 밀어서 그림
@@ -38,5 +43,5 @@ def load():
         for name, (f, w, h, cols, n, anchor, loop) in _SPECS.items():
             _cache[name] = SpriteSheet('resources/sheriff/' + f, w, h, cols, n, anchor,
                                        loop=loop, pingpong=(name == 'idle_front'),
-                                       size=_SIZE.get(name, 1.0), shift=_SHIFT.get(name))
+                                       size=_SIZE.get(name, 1.0), shift=_SHIFT.get(name), first=_FIRST.get(name, 0))
     return _cache
