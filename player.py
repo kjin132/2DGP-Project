@@ -21,6 +21,7 @@ MOVE_KEYS = {SDLK_w: (0, 1), SDLK_s: (0, -1), SDLK_a: (-1, 0), SDLK_d: (1, 0)}
 # 제자리에서 하는 동작과 재생 배속. 이 동작들이 끝날 때까지는 걸을 수 없음 (모두 옆모습 그림)
 ACTIONS = {'pickup': 1.6, 'shoot': 2.0, 'eat': 2.4, 'throw': 2.2}
 EAT_FRAME = 24         # 먹기: 손이 입에 닿는 장면 (이때 UI 가 사라지고 체력이 바뀜)
+DEATH_SPEED = 1.5      # 쓰러지는 동작 재생 배속 (약 1.8초)
 THROW_FRAME = 12       # 던지기: 팔을 앞으로 뻗어 손에서 놓는 장면 (이때 UI 가 날아감)
 
 
@@ -48,6 +49,9 @@ class Player(Body):
 
     # ---------- 입력 ----------
     def handle_event(self, e):
+        if self.state == 'dead':                  # 쓰러지면 눌려 있던 키도 놓은 것으로
+            self.held.clear()
+            return
         if e.type == SDL_KEYDOWN and e.key in MOVE_KEYS:
             self.held.add(e.key)
         elif e.type == SDL_KEYUP and e.key in MOVE_KEYS:
@@ -95,8 +99,8 @@ class Player(Body):
         return None, None
 
     def busy(self):
-        """대시나 줍기·먹기·던지기 동작 중 (다른 손동작을 시작할 수 없음)"""
-        return self.state in ('dash', 'pickup', 'eat', 'throw')
+        """대시나 줍기·먹기·던지기 동작 중, 또는 쓰러짐 (다른 동작을 시작할 수 없음)"""
+        return self.state in ('dash', 'pickup', 'eat', 'throw', 'dead')
 
     def interact(self):
         if self.busy():
@@ -163,6 +167,8 @@ class Player(Body):
             return
         if item.is_fake or item.is_enemy_ui:
             self.hp = max(0, self.hp - EAT_AMOUNT)
+            if self.hp <= 0:
+                self.fall()
         else:
             self.hp = min(MAX_HP, self.hp + EAT_AMOUNT)
         self.hands[self.hands.index(item)] = None
@@ -231,10 +237,19 @@ class Player(Body):
             ox = random.choice((-1, 1)) * random.uniform(30, 50)
             self.put_down(self.hands[i], self.x + ox, self.y + random.uniform(-15, 15))
             self.hands[i] = None
+        if self.hp <= 0:
+            self.fall()
         return True
 
+    def fall(self):
+        """체력이 0: 그 자리에서 쓰러지는 동작 (그 뒤로는 아무 조작도 안 됨)"""
+        self.held.clear()
+        self.invincible = False
+        self.hurt_t = 0.0                     # 쓰러지는 동안은 깜빡이지 않게
+        self.set_state('dead')
+
     def start_dash(self):
-        if self.state == 'dash' or self.dash_cool > 0:
+        if self.state in ('dash', 'dead') or self.dash_cool > 0:
             return
         dx, dy = self.move_dir()
         if not (dx or dy):                         # 서 있으면 바라보는 쪽으로
@@ -274,6 +289,8 @@ class Player(Body):
             self.reload_t -= dt
             if self.reload_t <= 0:
                 self.ammo = MAX_AMMO
+        if self.state == 'dead':                     # 쓰러진 뒤에는 동작만 재생
+            return
         if self.state == 'dash':
             self.try_move(self.dash_dir[0] * PLAYER_SPEED * DASH_SPEED * dt,
                           self.dash_dir[1] * PLAYER_SPEED * DASH_SPEED * dt)
@@ -318,12 +335,17 @@ class Player(Body):
         return 'side', self.facing == 'left'
 
     def draw(self):
-        if self.hurt_t > 0 and int(self.hurt_t * 16) % 2:    # 맞은 직후 깜빡임
+        if self.state != 'dead' and self.hurt_t > 0 and int(self.hurt_t * 16) % 2:    # 맞은 직후 깜빡임
             return
         sx, sy = camera.to_screen(self.x, self.y)
-        shadow.draw(sx, sy + 2, 46 * camera.Z)
+        if self.state != 'dead':
+            shadow.draw(sx, sy + 2, 46 * camera.Z)
         scale = CHAR_SCALE * camera.Z
         suffix, flip = self.view()
+        if self.state == 'dead':                     # 쓰러지는 동작 (끝나면 누운 마지막 장면 그대로)
+            sheet = self.sprites['death']
+            sheet.draw(sheet.frame_at(self.t * DEATH_SPEED), sx, sy, scale, self.facing == 'left')
+            return
         if self.state == 'dash':                     # 대시는 옆모습 한 종류
             sheet, flip = self.sprites['dash'], self.facing == 'left'
             speed = sheet.duration / DASH_TIME          # 대시 한 번에 달리기 한 바퀴가 딱 돌도록
