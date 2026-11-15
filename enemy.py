@@ -85,6 +85,8 @@ class Enemy(Body):
     def can_see(self, who):
         """앞쪽 시야(거리·각도) 안에 있고 건물에 가려지지 않으면 보임 (PRD 2.5 시야).
         아주 가까우면(SENSE_DIST) 어느 방향에 있든 알아챔"""
+        if getattr(who, 'hp', 1) <= 0:            # 쓰러진 보안관은 더 쫓지 않음
+            return False
         dx, dy = who.x - self.x, who.y - self.y
         d = math.hypot(dx, dy)
         if d > VIEW_DIST:

@@ -143,7 +143,7 @@ class Grunt(Enemy):
 
     def in_reach(self):
         tg = self.target
-        return abs(tg.x - self.x) < GRUNT_REACH and abs(tg.y - self.y) < 26
+        return tg.hp > 0 and abs(tg.x - self.x) < GRUNT_REACH and abs(tg.y - self.y) < 26
 
     def start_attack(self):
         self.facing = 'right' if self.target.x >= self.x else 'left'
