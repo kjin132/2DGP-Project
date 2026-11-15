@@ -182,7 +182,8 @@ def finish():
     game_world.clear()
 
 
-def update():
+def update_world():
+    """맵 위의 모든 것을 한 프레임 진행 (게임 오버 화면 뒤에서도 계속 돌아감)"""
     game_world.update()
     score.update()
     if 'minimap' in hud.active_kinds():
@@ -190,6 +191,10 @@ def update():
             if i.stolen_at is not None:
                 i.seen_on_map = True
     camera.follow(player.x, player.y + 40)
+
+
+def update():
+    update_world()
     player.set_aim(*camera.to_world(*mouse_screen))
     hud.mouse = mouse_screen   # 카메라가 움직여도 조준점이 마우스를 따라가게
     if exit_gate.reached(player):
