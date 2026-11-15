@@ -4,7 +4,7 @@ from sprite import SpriteSheet
 _SPECS = {
     'idle_side':  ('idle_side.png', 143, 262, 11, 33, (88, 260), True),
     'idle_front': ('idle_front.png', 196, 271, 10, 50, (112, 269), True),
-    'idle_back':  ('idle_back.png', 173, 267, 13, 49, (71, 264), True),
+    'idle_back':  ('idle_back.png', 152, 262, 8, 33, (67, 259), True),
     'walk_side':  ('walk_side.png', 189, 273, 24, 24, (106, 271), True),
     'walk_front': ('walk_front.png', 162, 266, 14, 28, (86, 263), True),
     'walk_back':  ('walk_back.png', 174, 273, 16, 32, (83, 265), True),
@@ -21,7 +21,8 @@ _SPECS = {
 # 사격 그림은 다리를 벌리고 선 자세라 키가 250px 로 가장 작게 그려져 있어 5% 키움 (모자 높이가 걷기와 같아짐).
 # 줍기도 대기와 같은 자세로 시작하므로 같은 3%
 # 달리기 그림은 머리(모자 챙 너비 106px)가 다른 동작(113px)보다 작게 그려져 있어 7% 키움
-_SIZE = {'idle_side': 1.03, 'dash': 1.07, 'shoot': 1.05, 'pickup': 1.03, 'eat': 1.03, 'throw': 1.03, 'death': 1.29}
+# 뒤 대기 그림은 키가 4px 작게 그려져 있어 2% 키움 (모자 높이가 뒤 걷기와 같아짐)
+_SIZE = {'idle_back': 1.02, 'idle_side': 1.03, 'dash': 1.07, 'shoot': 1.05, 'pickup': 1.03, 'eat': 1.03, 'throw': 1.03, 'death': 1.29}
 
 # 옆 걷기 그림은 장면마다 몸 전체가 좌우로 최대 9px 씩 튀어서(머리 위치 기준) 걸을 때 뚝뚝 끊겨 보임.
 # 그림은 그대로 두고, 머리가 늘 같은 자리에 오도록 프레임마다 밀어서 그림
