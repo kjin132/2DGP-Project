@@ -68,6 +68,17 @@ class Enemy(Body):
         self.moving = self.try_move(dx / d * v, dy / d * v)
         return False
 
+    def look_away_from_wall(self):
+        """멈춰 설 때 코앞이 벽·건물이면 트인 쪽으로 돌아섬 (벽만 보고 서 있지 않게)"""
+        fx, fy = self.FACING_DIR[self.facing]
+        if not self.blocked(self.x + fx * 40, self.y + fy * 40):
+            return
+        for f in random.sample(list(self.FACING_DIR), 4):
+            fx, fy = self.FACING_DIR[f]
+            if not any(self.blocked(self.x + fx * d, self.y + fy * d) for d in (40, 80, 120)):
+                self.facing = f
+                return
+
     # ---------- 시야 ----------
     FACING_DIR = {'right': (1, 0), 'left': (-1, 0), 'up': (0, 1), 'down': (0, -1)}
 

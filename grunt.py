@@ -25,6 +25,7 @@ class Grunt(Enemy):
         self.attack_cool = 0.0
         self.fetch_item = None          # 주우러 가는 바닥 UI
         self.hit_done = False           # 이번 휘두르기에서 이미 맞혔는지
+        self.walk_left = 0.0            # 돌아다니기: 지금 목적지를 포기하기까지 남은 시간
 
     def pick_wander_goal(self):
         """처음 자리 주변의 걸을 수 있는 곳 하나 (몇 번 해 보고 못 찾으면 제자리)"""
@@ -36,16 +37,25 @@ class Grunt(Enemy):
         return None
 
     def wander(self, dt):
+        """쉬다가 주변 한 곳으로 걸어가기를 반복. 건물은 길찾기로 돌아가고, 막히면 바로 그만둠"""
         if self.goal is None:
             self.moving = False
             self.wait -= dt
             if self.wait <= 0:
-                self.goal = self.pick_wander_goal()
-                self.wait = random.uniform(0.8, 2.0)
+                goal = self.pick_wander_goal()
+                if goal is not None and self.go_to(*goal):
+                    self.goal = goal
+                    self.walk_left = 8.0                  # 이 시간 안에 못 가면 그만둠
+                    self.wait = random.uniform(0.8, 2.0)
+                else:
+                    self.wait = 0.3                       # 갈 수 없는 곳이면 곧 다시 고름
             return
-        arrived = self.step_toward(*self.goal, dt, self.speed() * 0.5)   # 돌아다닐 때는 천천히
-        if arrived or not self.moving:            # 도착했거나 벽에 막히면 잠깐 쉬었다가 다른 곳으로
+        self.walk_left -= dt
+        arrived = self.follow_path(dt, self.speed() * 0.5)    # 돌아다닐 때는 천천히
+        if arrived or self.walk_left <= 0:
             self.goal = None
+            self.moving = False
+            self.look_away_from_wall()
 
     def chase(self, dt):
         """보이면 곧장, 건물에 막히면 길찾기로 돌아서 쫓아감"""
@@ -152,6 +162,12 @@ class Grunt(Enemy):
         if sheet.finished(self.t * GRUNT_ATTACK_SPEED):
             self.attack_cool = GRUNT_ATTACK_COOL
             self.set_state('chase')
+
+    def set_state(self, s):
+        if s == 'wander' and self.state != 'wander':     # 쫓다가·찾다가 그만둘 때도 벽을 보고 서지 않게
+            self.goal = None
+            self.look_away_from_wall()
+        super().set_state(s)
 
     def take_hit(self, damage):
         """맞으면 등 뒤에서 쏴도 알아차리고 쫓아옴"""
