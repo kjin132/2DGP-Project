@@ -5,7 +5,7 @@ class SpriteSheet:
     """가로 cols 칸짜리 스프라이트 시트 한 장 = 애니메이션 하나.
     anchor 는 칸 왼쪽 위 기준 발 위치(x, y). 그릴 때는 발 위치를 월드 좌표에 맞춘다."""
 
-    def __init__(self, path, w, h, cols, frames, anchor, fps=24, loop=True, pingpong=False, size=1.0):
+    def __init__(self, path, w, h, cols, frames, anchor, fps=24, loop=True, pingpong=False, size=1.0, shift=None):
         self.image = load_image(path)
         self.w, self.h = w, h
         self.cols = cols
@@ -15,6 +15,7 @@ class SpriteSheet:
         self.loop = loop
         self.pingpong = pingpong
         self.size = size        # 그림 속 캐릭터 키가 다른 시트와 맞추는 배율 (발 위치 기준)
+        self.shift = shift      # 프레임마다 가로로 밀어 그릴 양 (그림 px). 몸이 프레임마다 좌우로 튀는 시트 보정용
 
     @property
     def duration(self):
@@ -38,7 +39,7 @@ class SpriteSheet:
         col, row = i % self.cols, i // self.cols
         left = col * self.w
         bottom = self.image.h - (row + 1) * self.h
-        dx = (self.w / 2 - self.ax) * scale
+        dx = (self.w / 2 - self.ax + (self.shift[i] if self.shift else 0)) * scale
         dy = (self.ay - self.h / 2) * scale
         if flip:
             dx = -dx

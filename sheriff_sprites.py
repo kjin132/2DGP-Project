@@ -17,6 +17,10 @@ _SPECS = {
 # 발 위치 x 는 머리와 발 가운데가 같은 자리에 오도록 잡음 (서 있다 걸을 때 몸이 옆으로 튀지 않게)
 _SIZE = {'idle_side': 1.03, 'dash': 1.03}     # 달리기 그림도 몸을 숙여 그려져 있어 같은 비율로 키움
 
+# 옆 걷기 그림은 장면마다 몸 전체가 좌우로 최대 9px 씩 튀어서(머리 위치 기준) 걸을 때 뚝뚝 끊겨 보임.
+# 그림은 그대로 두고, 머리가 늘 같은 자리에 오도록 프레임마다 밀어서 그림
+_SHIFT = {'walk_side': (6, 6, 5, 5, -1, -1, -2, -3, -1, -1, 6, 6, 6, 6, 4, 4, 4, 3, 3, 4, 4, 3, 6, 5)}
+
 _cache = None
 
 
@@ -27,5 +31,5 @@ def load():
         for name, (f, w, h, cols, n, anchor, loop) in _SPECS.items():
             _cache[name] = SpriteSheet('resources/sheriff/' + f, w, h, cols, n, anchor,
                                        loop=loop, pingpong=(name == 'idle_front'),
-                                       size=_SIZE.get(name, 1.0))
+                                       size=_SIZE.get(name, 1.0), shift=_SHIFT.get(name))
     return _cache
