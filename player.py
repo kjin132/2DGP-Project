@@ -214,8 +214,7 @@ class Player(Body):
         self.ammo -= 1
         self.fire_cool = FIRE_INTERVAL
         self.facing = 'right' if right else 'left'
-        if self.state == 'idle' or self.state == 'shoot':   # 서서 쏘면 사격 동작, 걸으면서 쏘면 걷기 유지
-            self.state, self.t = 'shoot', 0.0
+        self.state, self.t = 'shoot', 0.0     # 쏘면 그 자리에 서서 사격 동작 (끝나야 다시 걸음)
         if self.ammo == 0:
             self.start_reload()
 
