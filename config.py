@@ -5,6 +5,7 @@ TITLE = 'Lost Interface'
 # 캐릭터
 CHAR_SCALE = 0.3           # 시트 원본 키 약 256px → 화면 약 77px
 PLAYER_SPEED = 220         # px/s
+WALK_CADENCE = 2.4         # 기본 속도로 걸을 때 1초에 걷기 동작이 도는 횟수 (한 바퀴 = 두 걸음). 세 방향 모두 같음
 DASH_TIME = 0.28           # 대시 지속 시간 (이 동안 무적)
 DASH_SPEED = 3.2           # 기본 속도의 배수
 DASH_COOLDOWN = 3.0        # 대시 후 다시 쓰기까지 걸리는 시간 (초)

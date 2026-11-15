@@ -9,7 +9,7 @@ import shadow
 from bullet import Bullet
 from thrown_ui import ThrownUI
 from body import Body
-from config import (CHAR_SCALE, PLAYER_SPEED, DASH_TIME, DASH_SPEED, DASH_COOLDOWN,
+from config import (CHAR_SCALE, PLAYER_SPEED, WALK_CADENCE, DASH_TIME, DASH_SPEED, DASH_COOLDOWN,
                     MAX_AMMO, RELOAD_TIME, FIRE_INTERVAL, PICK_RANGE, MAX_HP, HURT_INVINCIBLE,
                     WEIGHT_SPEED, EAT_AMOUNT, HURT_DROP_CHANCE)
 
@@ -38,7 +38,7 @@ class Player(Body):
         self.hands = [None, None]                 # 손 슬롯 2칸
         self.selected = 0                         # 1/2 키로 고른 슬롯
         self.hurt_t = 0.0                         # 0 보다 크면 맞은 직후 무적
-        self.walk_t = 0.0                         # 걷기 동작 시간 (무거우면 천천히 흐름)
+        self.walk_t = 0.0                         # 걷기 동작이 돈 횟수 (움직인 거리에 비례)
 
     # ---------- 입력 ----------
     def handle_event(self, e):
@@ -268,7 +268,7 @@ class Player(Body):
             n = math.hypot(dx, dy)
             v = self.speed()
             self.try_move(dx / n * v * dt, dy / n * v * dt)
-            self.walk_t += dt * v / PLAYER_SPEED     # 느려지면 발걸음도 느리게
+            self.walk_t += dt * WALK_CADENCE * v / PLAYER_SPEED   # 움직인 거리만큼 발걸음이 돎 (느려지면 발도 느리게)
             self.clamp_to_map()
             if dx:
                 self.facing = 'right' if dx > 0 else 'left'
@@ -308,5 +308,8 @@ class Player(Body):
             sheet.draw(sheet.frame_at(self.t * 2), sx, sy, scale, self.facing == 'left')
             return
         sheet = self.sprites[f'{self.state}_{suffix}']
-        t = self.walk_t if self.state == 'walk' else self.t
-        sheet.draw(sheet.frame_at(t), sx, sy, scale, flip)
+        if self.state == 'walk':     # 시트마다 장 수가 달라도(24·28·32장) 한 바퀴 도는 시간은 같게
+            frame = int(self.walk_t % 1.0 * sheet.frames)
+        else:
+            frame = sheet.frame_at(self.t)
+        sheet.draw(frame, sx, sy, scale, flip)
