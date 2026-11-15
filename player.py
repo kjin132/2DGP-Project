@@ -15,6 +15,9 @@ from config import (CHAR_SCALE, PLAYER_SPEED, WALK_CADENCE, DASH_TIME, DASH_SPEE
 
 GUN_HEIGHT = 56        # 발에서 총구까지 높이 (화면 px)
 GUN_REACH = 38         # 몸 중심에서 총구까지 가로 거리
+# 위·아래로 쏠 때 총구 위치 (몸 중심 기준 가로, 발에서 높이) — 앞·뒤 사격 그림의 불꽃 자리
+GUN_FRONT = (-10, 58)
+GUN_BACK = (26, 61)
 
 MOVE_KEYS = {SDLK_w: (0, 1), SDLK_s: (0, -1), SDLK_a: (-1, 0), SDLK_d: (1, 0)}
 
@@ -212,14 +215,20 @@ class Player(Body):
         if self.ammo <= 0:
             self.start_reload()
             return
-        right = self.aim_x >= self.x
-        gx = self.x + (GUN_REACH if right else -GUN_REACH)
-        gy = self.y + GUN_HEIGHT
+        # 마우스 방향으로 몸을 돌림: 위·아래 45도 안쪽이면 뒷모습·앞모습으로, 나머지는 옆모습으로 쏨
+        dx, dy = self.aim_x - self.x, self.aim_y - (self.y + GUN_HEIGHT)
+        if abs(dy) > abs(dx):
+            self.facing = 'up' if dy > 0 else 'down'
+            ox, oy = GUN_BACK if dy > 0 else GUN_FRONT
+            gx, gy = self.x + ox, self.y + oy
+        else:
+            self.facing = 'right' if dx >= 0 else 'left'
+            gx = self.x + (GUN_REACH if dx >= 0 else -GUN_REACH)
+            gy = self.y + GUN_HEIGHT
         angle = math.atan2(self.aim_y - gy, self.aim_x - gx)
         game_world.add_object(Bullet(gx, gy, angle), 1)
         self.ammo -= 1
         self.fire_cool = FIRE_INTERVAL
-        self.facing = 'right' if right else 'left'
         self.state, self.t = 'shoot', 0.0     # 쏘면 그 자리에 서서 사격 동작 (끝나야 다시 걸음)
         if self.ammo == 0:
             self.start_reload()
@@ -271,6 +280,12 @@ class Player(Body):
         dy = sum(MOVE_KEYS[k][1] for k in self.held)
         return dx, dy
 
+    def action_sheet(self):
+        """제자리 동작의 시트: 사격만 바라보는 쪽(앞·뒤·옆)에 따라 다르고, 나머지는 옆모습"""
+        if self.state == 'shoot' and self.facing in ('up', 'down'):
+            return self.sprites['shoot_back' if self.facing == 'up' else 'shoot_front']
+        return self.sprites[self.state]
+
     def set_state(self, s):
         if s != self.state:
             self.state = s
@@ -301,7 +316,7 @@ class Player(Body):
                 self.set_state('idle')
             return
         if self.state in ACTIONS:                    # 줍기·사격·먹기·던지기 동안은 제자리
-            sheet, t = self.sprites[self.state], self.t * ACTIONS[self.state]
+            sheet, t = self.action_sheet(), self.t * ACTIONS[self.state]
             if self.using is not None:
                 if self.state == 'eat' and sheet.frame_at(t) >= EAT_FRAME:
                     self.swallow()
@@ -351,8 +366,8 @@ class Player(Body):
             speed = sheet.duration / DASH_TIME          # 대시 한 번에 달리기 한 바퀴가 딱 돌도록
             sheet.draw(sheet.frame_at(self.t * speed), sx, sy, scale, flip)
             return
-        if self.state in ACTIONS:                    # 줍기·사격·먹기·던지기는 옆모습
-            sheet = self.sprites[self.state]
+        if self.state in ACTIONS:                    # 줍기·먹기·던지기는 옆모습, 사격은 앞·뒤·옆
+            sheet = self.action_sheet()
             sheet.draw(sheet.frame_at(self.t * ACTIONS[self.state]), sx, sy, scale, self.facing == 'left')
             return
         sheet = self.sprites[f'{self.state}_{suffix}']
