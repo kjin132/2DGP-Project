@@ -26,6 +26,9 @@ ACTIONS = {'pickup': 1.6, 'shoot': 2.0, 'eat': 2.4, 'throw': 2.2}
 EAT_FRAME = 24         # 먹기: 손이 입에 닿는 장면 (이때 UI 가 사라지고 체력이 바뀜)
 DEATH_SPEED = 1.5      # 쓰러지는 동작 재생 배속 (약 1.8초)
 THROW_FRAME = 12       # 던지기: 팔을 앞으로 뻗어 손에서 놓는 장면 (이때 UI 가 날아감)
+# 앞·뒤 던지기 시트: (재생 배속, 손에서 놓는 장면, 뻗은 손의 가로 위치)
+# 두 시트 모두 22번 장면에서 팔을 뻗음. 뒤 던지기는 82장으로 길어서 더 빠르게 재생해 길이를 맞춤
+THROW_VIEWS = {'down': ('throw_front', 2.4, 22, -26), 'up': ('throw_back', 3.2, 22, -41)}
 
 
 class Player(Body):
@@ -183,7 +186,11 @@ class Player(Body):
         if item is None or self.busy():
             return
         self.using = item
-        self.facing = 'right' if self.aim_x >= self.x else 'left'
+        dx, dy = self.aim_x - self.x, self.aim_y - (self.y + GUN_HEIGHT)
+        if abs(dy) > abs(dx):                      # 위·아래 45도 안쪽이면 뒷모습·앞모습으로 던짐
+            self.facing = 'up' if dy > 0 else 'down'
+        else:
+            self.facing = 'right' if dx >= 0 else 'left'
         self.set_state('throw')
 
     def release(self):
@@ -193,7 +200,10 @@ class Player(Body):
             return
         self.hands[self.hands.index(item)] = None
         item.destroy()
-        hand = self.x + (36 if self.facing == 'right' else -36)       # 뻗은 손 위치에서 출발
+        if self.facing in THROW_VIEWS:                 # 뻗은 손 위치에서 출발
+            hand = self.x + THROW_VIEWS[self.facing][3]
+        else:
+            hand = self.x + (36 if self.facing == 'right' else -36)
         game_world.add_object(ThrownUI(item, hand, self.y, self.aim_x, self.aim_y - GUN_HEIGHT), 1)
 
     def put_down(self, item, x, y):
@@ -281,10 +291,22 @@ class Player(Body):
         return dx, dy
 
     def action_sheet(self):
-        """제자리 동작의 시트: 사격만 바라보는 쪽(앞·뒤·옆)에 따라 다르고, 나머지는 옆모습"""
+        """제자리 동작의 시트: 사격·던지기는 바라보는 쪽(앞·뒤·옆)에 따라 다르고, 나머지는 옆모습"""
         if self.state == 'shoot' and self.facing in ('up', 'down'):
             return self.sprites['shoot_back' if self.facing == 'up' else 'shoot_front']
+        if self.state == 'throw' and self.facing in THROW_VIEWS:
+            return self.sprites[THROW_VIEWS[self.facing][0]]
         return self.sprites[self.state]
+
+    def action_speed(self):
+        if self.state == 'throw' and self.facing in THROW_VIEWS:
+            return THROW_VIEWS[self.facing][1]
+        return ACTIONS[self.state]
+
+    def release_frame(self):
+        if self.facing in THROW_VIEWS:
+            return THROW_VIEWS[self.facing][2]
+        return THROW_FRAME
 
     def set_state(self, s):
         if s != self.state:
@@ -316,11 +338,11 @@ class Player(Body):
                 self.set_state('idle')
             return
         if self.state in ACTIONS:                    # 줍기·사격·먹기·던지기 동안은 제자리
-            sheet, t = self.action_sheet(), self.t * ACTIONS[self.state]
+            sheet, t = self.action_sheet(), self.t * self.action_speed()
             if self.using is not None:
                 if self.state == 'eat' and sheet.frame_at(t) >= EAT_FRAME:
                     self.swallow()
-                elif self.state == 'throw' and sheet.frame_at(t) >= THROW_FRAME:
+                elif self.state == 'throw' and sheet.frame_at(t) >= self.release_frame():
                     self.release()
             if not sheet.finished(t):
                 return
@@ -366,9 +388,9 @@ class Player(Body):
             speed = sheet.duration / DASH_TIME          # 대시 한 번에 달리기 한 바퀴가 딱 돌도록
             sheet.draw(sheet.frame_at(self.t * speed), sx, sy, scale, flip)
             return
-        if self.state in ACTIONS:                    # 줍기·먹기·던지기는 옆모습, 사격은 앞·뒤·옆
+        if self.state in ACTIONS:                    # 줍기·먹기는 옆모습, 사격·던지기는 앞·뒤·옆
             sheet = self.action_sheet()
-            sheet.draw(sheet.frame_at(self.t * ACTIONS[self.state]), sx, sy, scale, self.facing == 'left')
+            sheet.draw(sheet.frame_at(self.t * self.action_speed()), sx, sy, scale, self.facing == 'left')
             return
         sheet = self.sprites[f'{self.state}_{suffix}']
         if self.state == 'walk':     # 시트마다 장 수가 달라도(24·28·32장) 한 바퀴 도는 시간은 같게
