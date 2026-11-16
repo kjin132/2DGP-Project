@@ -36,7 +36,8 @@ EAT_AMOUNT = 25            # UI 를 먹으면 회복(또는 적·가짜 UI 면 �
 ENEMY_SPEED_MUL = 1.2      # 적은 보안관 기본 속도보다 빠름
 HIT_SLOW_MUL = 0.5         # 맞으면 잠시 느려짐
 HIT_SLOW_TIME = 1.5
-VIEW_DIST = 380            # 시야 거리 (월드 px)
+NOTICE_DIST = 220          # 이 거리 안에 들어와야 보안관을 알아채고 쫓기 시작 (월드 px, 화면 반쯤)
+VIEW_DIST = 380            # 쫓는 중에는 이 거리까지 보임 (이보다 멀어지면 놓침)
 VIEW_ANGLE = 120           # 시야 각도 (도)
 SENSE_DIST = 170           # 이 거리 안이면 등 뒤에 있어도 기척으로 알아챔 (건물 너머는 제외)
 

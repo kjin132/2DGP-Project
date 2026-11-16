@@ -4,6 +4,7 @@ import random
 from ui_item import UIItem
 from body import Body
 from config import GRUNT_DAMAGE, GRUNT_REACH, GRUNT_ATTACK_SPEED, GRUNT_HIT_FRAME, GRUNT_ATTACK_COOL
+from config import VIEW_DIST, NOTICE_DIST
 from enemy import Enemy
 
 
@@ -193,7 +194,8 @@ class Grunt(Enemy):
             self.goal = None
 
     def think(self, dt):
-        sees = self.target is not None and self.can_see(self.target)
+        reach = VIEW_DIST if self.state in ('chase', 'cover', 'attack') else NOTICE_DIST   # 쫓는 중엔 더 멀리까지 놓치지 않음
+        sees = self.target is not None and self.can_see(self.target, reach)
         if sees and self.state in ('wander', 'search', 'fetch'):
             self.set_state('chase')
         elif not sees and self.state == 'chase' and not self.in_reach():
