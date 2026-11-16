@@ -13,7 +13,7 @@ class Grunt(Enemy):
     max_hp = 40
     points = 100
     WANDER_RANGE = 350          # 처음 자리에서 이만큼 안에서 돌아다님
-    COVER_RANGE = 650           # 도둑이 달아날 때 이 거리 안의 갱단원이 보안관 앞을 막음
+    COVER_RANGE = 300           # 도둑이 달아날 때 이 거리 안의 갱단원이 보안관 앞을 막음 (화면 안쪽 정도)
     COVER_GAP = 70              # 보안관에게서 도둑 쪽으로 이만큼 떨어진 곳에 섬
 
     def __init__(self, x, y):
