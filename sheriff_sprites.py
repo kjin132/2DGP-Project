@@ -32,6 +32,9 @@ _FIRST = {'shoot_front': 22, 'shoot_back': 18}
 # 뒤 던지기 그림은 키는 같은데 몸이 가로로 홀쭉하게 그려져 있음 (모자 챙 99px, 뒤 대기는 113px).
 # 키는 3% 키우고 가로는 11% 더 늘려 뒤 대기·걷기와 같은 비율로
 _STRETCH = {'throw_back': 1.11}
+# 옆 대기와 옆 걷기는 다리 길이가 달라 벨트(버클) 높이가 10px 차이 남 (발에서 대기 104, 걷기 114).
+# 둘 다 109 에 오도록 대기는 다리를 조금 늘리고 걷기는 조금 줄임 (모자 높이는 그대로)
+_LEGS = {'idle_side': (101, 1.048), 'walk_side': (114, 0.956)}
 _SIZE = {'throw_back': 1.03, 'shoot_back': 1.02, 'idle_back': 1.02, 'idle_side': 1.03, 'dash': 1.07, 'shoot': 1.05, 'pickup': 1.03, 'eat': 1.03, 'throw': 1.03, 'death': 1.29}
 
 # 옆 걷기 그림은 장면마다 몸 전체가 좌우로 최대 9px 씩 튀어서(머리 위치 기준) 걸을 때 뚝뚝 끊겨 보임.
@@ -48,5 +51,6 @@ def load():
         for name, (f, w, h, cols, n, anchor, loop) in _SPECS.items():
             _cache[name] = SpriteSheet('resources/sheriff/' + f, w, h, cols, n, anchor,
                                        loop=loop, pingpong=(name == 'idle_front'),
-                                       size=_SIZE.get(name, 1.0), shift=_SHIFT.get(name), first=_FIRST.get(name, 0), stretch=_STRETCH.get(name, 1.0))
+                                       size=_SIZE.get(name, 1.0), shift=_SHIFT.get(name), first=_FIRST.get(name, 0), stretch=_STRETCH.get(name, 1.0),
+                                       legs=_LEGS.get(name))
     return _cache
