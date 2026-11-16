@@ -9,7 +9,7 @@ import enemy_sprites
 import pathfind
 from pico2d import load_image
 from body import Body
-from config import CHAR_SCALE, PLAYER_SPEED, ENEMY_SPEED_MUL, VIEW_DIST, VIEW_ANGLE, HIT_SLOW_MUL, HIT_SLOW_TIME
+from config import CHAR_SCALE, PLAYER_SPEED, ENEMY_SPEED_MUL, VIEW_ANGLE, HIT_SLOW_MUL, HIT_SLOW_TIME
 from config import ENEMY_UI_DROP_CHANCE, SENSE_DIST, NOTICE_DIST
 
 
